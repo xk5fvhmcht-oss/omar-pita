@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="artisan">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+<!-- PWA Meta Tags -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Omar Pita">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#fdf8f0" id="themeColor">
+<meta name="description" content="Omar Pita Master — science-verified pita bread calculator">
+
+<!-- PWA Manifest (inline) -->
+<link rel="manifest" href="data:application/json;charset=utf-8,%7B%22name%22%3A%22Omar%20Pita%20Master%22%2C%22short_name%22%3A%22Omar%20Pita%22%2C%22description%22%3A%22Science-verified%20pita%20bread%20calculator%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22orientation%22%3A%22portrait%22%2C%22background_color%22%3A%22%23fdf8f0%22%2C%22theme_color%22%3A%22%23c17b3a%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%3D%2527http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%2527%2520viewBox%3D%25270%25200%2520512%2520512%2527%253E%253Crect%2520width%3D%2527512%2527%2520height%3D%2527512%2527%2520rx%3D%252780%2527%2520fill%3D%2527%2523c17b3a%2527%2F%253E%253Ctext%2520x%3D%2527256%2527%2520y%3D%2527340%2527%2520font-size%3D%2527300%2527%2520text-anchor%3D%2527middle%2527%253E%25F0%259F«%25AB%2523%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
+
+<!-- Apple Touch Icon (inline SVG as data URI) -->
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='80' fill='%23c17b3a'/><text x='256' y='360' font-size='320' text-anchor='middle'>🫓</text></svg>">
+
+<title>Omar Pita Master</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,300;1,9..144,500&family=DM+Mono:wght@300;400&family=Caveat:wght@400;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* ─── ARTISAN THEME ───────────────────────────────────────────────────────── */
+[data-theme="artisan"] {
+  --bg:#fdf8f0;--card:#f7f0e3;--border:#efe6d3;
+  --ink:#2d2418;--ink2:#5c4d38;--ink3:#9c8b72;
+  --accent:#c17b3a;--accent-lt:#e8c99a;--accent-f:rgba(193,123,58,0.10);
+  --teal:#2d7d72;--teal-f:rgba(45,125,114,0.10);
+  --rose:#b85c5c;--rose-f:rgba(184,92,92,0.10);
+  --ice:#5b9bd5;--sub:var(--card);
+  --body-font:'Fraunces',Georgia,serif;
+  --label-font:'Caveat',cursive;
+  --num-font:'DM Mono','Courier New',monospace;
+  --card-radius:16px;--btn-radius:10px;--pill-radius:20px;
+  --card-border:1.5px solid var(--border);
+  --card-hover-shadow:0 8px 30px rgba(45,36,24,0.08);
+  --header-align:center;
+}
+/* ─── PROFESSIONAL THEME ──────────────────────────────────────────────────── */
+[data-theme="pro"] {
+  --bg:#0f1117;--card:#181c24;--border:#262c38;
+  --ink:#e8eaf0;--ink2:#9aa0b0;--ink3:#525a70;
+  --accent:#4a9eff;--accent-lt:#1a3a5c;--accent-f:rgba(74,158,255,0.10);
+  --teal:#34c98a;--teal-f:rgba(52,201,138,0.10);
+  --rose:#ff5c5c;--rose-f:rgba(255,92,92,0.10);
+  --ice:#7ab8ff;--sub:#111520;
+  --body-font:'Inter',system-ui,sans-serif;
+  --label-font:'Inter',system-ui,sans-serif;
+  --num-font:'DM Mono','Courier New',monospace;
+  --card-radius:6px;--btn-radius:4px;--pill-radius:4px;
+  --card-border:1px solid var(--border);
+  --card-hover-shadow:0 4px 20px rgba(0,0,0,0.4);
+  --header-align:left;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+body{
+  font-family:var(--body-font);background:var(--bg);color:var(--ink);
+  min-height:100vh;overflow-x:hidden;position:relative;
+  transition:background 0.35s ease,color 0.35s ease;
+  /* iOS safe area */
+  padding-bottom:env(safe-area-inset-bottom);
+}
+
+[data-theme="artisan"] body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:100;opacity:0.025;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+}
+[data-theme="pro"] body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:100;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,0.012) 2px,rgba(255,255,255,0.012) 4px);
+}
+
+/* Floaters */
+.floaters{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+.floater{position:absolute;opacity:0.06;animation:floatUp linear infinite;user-select:none;}
+[data-theme="pro"] .floater{display:none;}
+@keyframes floatUp{0%{transform:translateY(110vh) rotate(0deg);opacity:0}10%{opacity:0.06}90%{opacity:0.06}100%{transform:translateY(-20vh) rotate(360deg);opacity:0}}
+
+/* Install banner */
+#installBanner{
+  display:none;position:fixed;bottom:0;left:0;right:0;z-index:999;
+  background:var(--accent);color:#fff;
+  padding:14px 20px calc(14px + env(safe-area-inset-bottom));
+  font-family:var(--num-font);font-size:0.8rem;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  box-shadow:0 -4px 20px rgba(0,0,0,0.2);
+}
+#installBanner.hidden{display:none!important;}
+#installBanner .install-text{line-height:1.4;}
+#installBanner button{
+  background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.4);
+  color:#fff;padding:6px 14px;border-radius:var(--pill-radius);
+  font-family:var(--num-font);font-size:0.75rem;cursor:pointer;white-space:nowrap;
+}
+
+/* Offline badge */
+#offlineBadge{
+  display:none;position:fixed;top:12px;right:12px;z-index:998;
+  background:var(--rose);color:#fff;
+  font-family:var(--num-font);font-size:0.65rem;letter-spacing:0.08em;
+  padding:3px 10px;border-radius:var(--pill-radius);
+}
+
+/* Layout */
+.page{
+  position:relative;z-index:1;max-width:1160px;margin:0 auto;
+  padding:40px 24px 100px;display:grid;grid-template-columns:1fr;gap:28px;
+}
+@media(min-width:920px){.page{grid-template-columns:1fr 420px;}}
+
+/* Theme bar */
+.theme-bar{grid-column:1/-1;display:flex;justify-content:flex-end;margin-bottom:-12px;}
+.theme-toggle{
+  display:flex;align-items:center;gap:10px;background:var(--card);
+  border:var(--card-border);border-radius:var(--pill-radius);
+  padding:6px 14px;cursor:pointer;font-family:var(--num-font);
+  font-size:0.7rem;color:var(--ink2);transition:all 0.2s;letter-spacing:0.05em;
+}
+.theme-toggle:hover{color:var(--accent);}
+.toggle-icon{
+  width:28px;height:14px;border-radius:7px;background:var(--border);
+  position:relative;transition:background 0.3s;flex-shrink:0;
+}
+.toggle-icon::after{
+  content:'';position:absolute;left:2px;top:2px;width:10px;height:10px;
+  border-radius:50%;background:var(--ink3);transition:transform 0.3s,background 0.3s;
+}
+[data-theme="pro"] .toggle-icon{background:var(--accent-f);}
+[data-theme="pro"] .toggle-icon::after{transform:translateX(14px);background:var(--accent);}
+
+/* Header */
+.header{grid-column:1/-1;text-align:var(--header-align);padding:20px 0 10px;animation:fadeDown 0.6s ease both;}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
+.header-eyebrow{font-family:var(--label-font);font-size:1.1rem;color:var(--accent);margin-bottom:4px;transform:rotate(-1deg);display:inline-block;}
+[data-theme="pro"] .header-eyebrow{font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;transform:none;font-family:var(--num-font);}
+.header h1{font-family:var(--body-font);font-size:clamp(2rem,5vw,3.2rem);font-weight:700;font-style:italic;color:var(--ink);letter-spacing:-0.02em;line-height:1.1;}
+[data-theme="pro"] .header h1{font-style:normal;font-size:clamp(1.4rem,3vw,1.8rem);letter-spacing:0;font-weight:600;}
+.header h1 span{color:var(--accent);}
+.header-sub{font-family:var(--label-font);font-size:1rem;color:var(--ink3);margin-top:8px;transform:rotate(0.5deg);display:inline-block;}
+[data-theme="pro"] .header-sub{font-size:0.72rem;font-family:var(--num-font);transform:none;letter-spacing:0.04em;}
+.version-badge{display:inline-block;font-family:var(--num-font);font-size:0.65rem;background:var(--border);color:var(--ink3);padding:2px 8px;border-radius:var(--pill-radius);margin-top:10px;letter-spacing:0.05em;}
+
+/* Cards */
+.card{background:var(--card);border:var(--card-border);border-radius:var(--card-radius);padding:24px;position:relative;transition:transform 0.2s ease,box-shadow 0.2s ease,background 0.35s ease,border 0.35s ease;animation:riseIn 0.5s ease both;}
+.card:hover{transform:translateY(-1px);box-shadow:var(--card-hover-shadow);}
+[data-theme="pro"] .card:hover{transform:none;box-shadow:none;border-color:var(--accent-lt);}
+[data-theme="pro"] .card{animation:none;}
+.card:nth-child(1){animation-delay:0.1s}.card:nth-child(2){animation-delay:0.2s}.card:nth-child(3){animation-delay:0.3s}.card:nth-child(4){animation-delay:0.4s}
+@keyframes riseIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.card-title{font-family:var(--label-font);font-size:1.2rem;color:var(--accent);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+[data-theme="pro"] .card-title{font-family:var(--num-font);font-size:0.72rem;text-transform:uppercase;letter-spacing:0.12em;border-bottom:1px solid var(--border);padding-bottom:10px;}
+.card-title .num{width:24px;height:24px;background:var(--accent);color:var(--bg);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--num-font);font-size:0.7rem;flex-shrink:0;}
+[data-theme="pro"] .card-title .num{border-radius:2px;width:20px;height:20px;font-size:0.65rem;}
+.section-label{font-family:var(--label-font);font-size:0.9rem;color:var(--ink3);margin-bottom:6px;display:block;}
+[data-theme="pro"] .section-label{font-family:var(--num-font);font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;}
+
+/* Mode / oven buttons */
+.mode-row{display:flex;gap:8px;margin-bottom:18px;}
+.mode-btn{flex:1;padding:10px 8px;border-radius:var(--btn-radius);border:var(--card-border);background:var(--bg);color:var(--ink2);cursor:pointer;font-family:var(--body-font);font-size:0.82rem;font-weight:500;transition:all 0.2s;text-align:center;}
+.mode-btn:hover{border-color:var(--accent-lt);color:var(--accent);}
+.mode-btn.on{background:var(--ink);color:var(--bg);border-color:var(--ink);}
+[data-theme="pro"] .mode-btn.on{background:var(--accent);color:#000;border-color:var(--accent);}
+.mode-btn .emoji{display:block;font-size:1.1rem;margin-bottom:2px;}
+[data-theme="pro"] .mode-btn .emoji{display:none;}
+[data-theme="pro"] .mode-btn{font-family:var(--num-font);font-size:0.75rem;letter-spacing:0.04em;}
+
+/* Pills */
+.pill-row{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+.pill{padding:6px 14px;border-radius:var(--pill-radius);border:var(--card-border);background:var(--bg);color:var(--ink2);cursor:pointer;font-family:var(--body-font);font-size:0.8rem;transition:all 0.18s;font-style:italic;}
+[data-theme="pro"] .pill{font-family:var(--num-font);font-size:0.72rem;font-style:normal;letter-spacing:0.03em;}
+.pill:hover{border-color:var(--accent-lt);color:var(--accent);}
+.pill.on{background:var(--accent);color:#000;border-color:var(--accent);font-style:normal;font-weight:500;}
+.pill.locked{opacity:0.3;pointer-events:none;}
+
+/* Mixer grid */
+.mixer-row{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;}
+.mixer-btn{padding:9px 8px;border-radius:var(--btn-radius);border:var(--card-border);background:var(--bg);color:var(--ink2);cursor:pointer;font-family:var(--body-font);font-size:0.78rem;transition:all 0.18s;text-align:center;font-style:italic;}
+[data-theme="pro"] .mixer-btn{font-family:var(--num-font);font-size:0.72rem;font-style:normal;letter-spacing:0.03em;}
+.mixer-btn:hover{border-color:var(--accent-lt);color:var(--accent);}
+.mixer-btn.on{background:var(--ink);color:var(--bg);border-color:var(--ink);}
+[data-theme="pro"] .mixer-btn.on{background:var(--accent);color:#000;border-color:var(--accent);}
+.mixer-btn .emoji{display:block;font-size:1rem;margin-bottom:2px;}
+[data-theme="pro"] .mixer-btn .emoji{display:none;}
+.mixer-rec{font-family:var(--label-font);font-size:0.88rem;color:var(--teal);background:var(--teal-f);border:1px solid rgba(45,125,114,0.2);border-radius:var(--btn-radius);padding:7px 12px;margin-bottom:14px;display:none;}
+[data-theme="pro"] .mixer-rec{font-family:var(--num-font);font-size:0.72rem;}
+.mixer-warn{font-family:var(--label-font);font-size:0.88rem;border-radius:var(--btn-radius);padding:7px 12px;margin-bottom:14px;display:none;}
+[data-theme="pro"] .mixer-warn{font-family:var(--num-font);font-size:0.72rem;}
+.mixer-warn.hard{background:var(--rose-f);color:var(--rose);border:1px solid rgba(255,92,92,0.25);}
+.mixer-warn.soft{background:var(--accent-f);color:var(--accent);border:1px solid rgba(74,158,255,0.2);}
+[data-theme="artisan"] .mixer-warn.soft{color:#9a5a10;border-color:rgba(193,123,58,0.3);}
+
+/* Sliders */
+.slider-wrap{margin-bottom:18px;}
+.slider-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;}
+.slider-name{font-family:var(--body-font);font-size:0.82rem;color:var(--ink2);font-style:italic;}
+[data-theme="pro"] .slider-name{font-family:var(--num-font);font-style:normal;font-size:0.72rem;letter-spacing:0.03em;}
+.slider-val{font-family:var(--num-font);font-size:0.8rem;color:var(--accent);background:var(--accent-f);padding:1px 8px;border-radius:var(--pill-radius);}
+.slider-val.pop{animation:pop 0.2s ease;}
+@keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.2)}100%{transform:scale(1)}}
+input[type=range]{-webkit-appearance:none;width:100%;height:6px;border-radius:3px;background:var(--border);outline:none;cursor:pointer;}
+[data-theme="pro"] input[type=range]{height:4px;border-radius:2px;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--accent);border:2px solid var(--card);box-shadow:0 2px 8px rgba(0,0,0,0.3);cursor:grab;transition:transform 0.15s,box-shadow 0.15s;}
+[data-theme="pro"] input[type=range]::-webkit-slider-thumb{width:16px;height:16px;border-radius:2px;}
+input[type=range]::-webkit-slider-thumb:active{cursor:grabbing;transform:scale(1.15);}
+#tempSlider{background:linear-gradient(to right,#7ec8e3,#ffe083,#ff7043);}
+#fTempSlider{background:linear-gradient(to right,#a8d8ea,#7ec8e3);}
+[data-theme="pro"] #tempSlider{background:linear-gradient(to right,#1a3a5c,#4a9eff,#ff5c5c);}
+[data-theme="pro"] #fTempSlider{background:linear-gradient(to right,#1a3a5c,#4a9eff);}
+input[type=datetime-local]{width:100%;padding:10px 14px;border-radius:var(--btn-radius);border:var(--card-border);background:var(--bg);color:var(--ink);font-family:var(--num-font);font-size:0.82rem;margin-bottom:18px;outline:none;transition:border-color 0.2s;}
+input[type=datetime-local]:focus{border-color:var(--accent);}
+
+/* Autolyse button */
+.auto-btn{width:100%;padding:10px;border-radius:var(--btn-radius);border:1.5px dashed var(--border);background:transparent;color:var(--ink2);cursor:pointer;font-family:var(--label-font);font-size:1rem;transition:all 0.2s;margin-top:6px;}
+[data-theme="pro"] .auto-btn{font-family:var(--num-font);font-size:0.72rem;letter-spacing:0.03em;padding:8px 10px;}
+.auto-btn:hover{border-color:var(--teal);color:var(--teal);}
+.auto-btn.on{border-color:var(--teal);background:var(--teal-f);color:var(--teal);}
+.auto-btn.locked{opacity:0.3;pointer-events:none;}
+
+/* Subsection */
+.subsection{background:var(--sub);border:var(--card-border);border-radius:var(--btn-radius);padding:16px;margin-bottom:12px;}
+
+/* Warn boxes */
+.warn-box{border-radius:var(--btn-radius);padding:10px 14px;font-family:var(--label-font);font-size:1rem;margin-top:10px;display:none;animation:wobble 0.4s ease;}
+[data-theme="pro"] .warn-box{font-family:var(--num-font);font-size:0.72rem;animation:none;}
+@keyframes wobble{0%{transform:rotate(0)}25%{transform:rotate(-0.8deg)}75%{transform:rotate(0.8deg)}100%{transform:rotate(0)}}
+.warn-box.under{display:block;background:var(--rose-f);color:var(--rose);border:1px solid rgba(255,92,92,0.25);}
+.warn-box.over{display:block;background:var(--accent-f);color:var(--accent);border:1px solid rgba(74,158,255,0.2);}
+[data-theme="artisan"] .warn-box.over{color:#9a5a10;border-color:rgba(193,123,58,0.3);background:rgba(193,123,58,0.10);}
+
+/* Ferment meter */
+.ferment-meter{height:6px;border-radius:3px;background:var(--border);margin:8px 0 4px;overflow:hidden;}
+[data-theme="pro"] .ferment-meter{height:4px;border-radius:2px;}
+.ferment-bar{height:100%;border-radius:3px;transition:width 0.4s ease,background 0.4s ease;}
+.ferment-label{font-family:var(--num-font);font-size:0.7rem;color:var(--ink3);display:flex;justify-content:space-between;}
+
+/* Recipe */
+.recipe-item{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px dashed var(--border);animation:fadeIn 0.3s ease both;}
+[data-theme="pro"] .recipe-item{border-bottom:1px solid var(--border);animation:none;}
+.recipe-item:last-child{border-bottom:none;}
+.ing-name{font-family:var(--body-font);font-size:0.88rem;color:var(--ink2);font-style:italic;display:flex;align-items:center;gap:8px;}
+[data-theme="pro"] .ing-name{font-family:var(--num-font);font-style:normal;font-size:0.78rem;letter-spacing:0.02em;}
+.ing-emoji{font-size:1rem;}
+[data-theme="pro"] .ing-emoji{display:none;}
+.ing-weight{font-family:var(--num-font);font-size:0.88rem;color:var(--ink);background:var(--border);padding:2px 10px;border-radius:var(--pill-radius);}
+[data-theme="pro"] .ing-weight{border-radius:2px;font-size:0.82rem;background:transparent;color:var(--accent);}
+@keyframes fadeIn{from{opacity:0;transform:translateX(6px)}to{opacity:1;transform:translateX(0)}}
+
+/* DDT box */
+.ddt-box{margin-top:14px;padding:12px 14px;background:var(--sub);border:var(--card-border);border-radius:var(--btn-radius);font-family:var(--label-font);font-size:0.95rem;color:var(--ink2);line-height:1.8;}
+[data-theme="pro"] .ddt-box{font-family:var(--num-font);font-size:0.78rem;line-height:1.7;}
+.ddt-title{font-size:0.7rem;font-family:var(--num-font);color:var(--ink3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:5px;}
+.ddt-temp{color:var(--accent);font-weight:600;}
+.ice-line{color:var(--ice);border-top:1px dashed var(--border);margin-top:8px;padding-top:8px;font-size:0.9rem;}
+[data-theme="pro"] .ice-line{font-size:0.75rem;}
+.batch-total{font-family:var(--label-font);font-size:1.1rem;color:var(--ink2);text-align:right;margin-top:14px;padding-top:12px;border-top:1.5px solid var(--border);}
+[data-theme="pro"] .batch-total{font-family:var(--num-font);font-size:0.82rem;}
+.batch-total strong{color:var(--accent);}
+
+/* Timeline */
+.timeline{list-style:none;}
+.tl-item{display:flex;gap:14px;padding-bottom:20px;position:relative;animation:riseIn 0.4s ease both;}
+[data-theme="pro"] .tl-item{animation:none;padding-bottom:16px;}
+.tl-item::before{content:'';position:absolute;left:11px;top:22px;width:1.5px;height:calc(100% - 10px);background:var(--border);}
+[data-theme="pro"] .tl-item::before{width:1px;}
+.tl-item:last-child::before{display:none;}
+.tl-dot{width:24px;height:24px;border-radius:50%;background:var(--card);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:0.75rem;flex-shrink:0;transition:all 0.3s;}
+[data-theme="pro"] .tl-dot{border-radius:2px;width:22px;height:22px;font-size:0.65rem;}
+.tl-item.bake .tl-dot{background:var(--accent);border-color:var(--accent);font-size:0.9rem;}
+.tl-time{font-family:var(--num-font);font-size:1rem;color:var(--accent);display:block;margin-bottom:3px;}
+[data-theme="pro"] .tl-time{font-size:0.88rem;letter-spacing:0.02em;}
+.tl-label{font-family:var(--body-font);font-size:1.05rem;color:var(--ink);font-style:italic;font-weight:500;}
+[data-theme="pro"] .tl-label{font-family:var(--num-font);font-style:normal;font-size:0.82rem;font-weight:500;letter-spacing:0.03em;}
+.tl-note{font-family:var(--label-font);font-size:0.95rem;color:var(--ink3);margin-top:4px;display:block;line-height:1.5;}
+[data-theme="pro"] .tl-note{font-family:var(--num-font);font-size:0.7rem;line-height:1.5;letter-spacing:0.02em;}
+.tl-note.highlight{background:var(--teal-f);border-left:2px solid var(--teal);color:var(--teal);padding:6px 10px;border-radius:0 8px 8px 0;margin-top:6px;font-size:0.92rem;}
+[data-theme="pro"] .tl-note.highlight{border-radius:0 2px 2px 0;font-size:0.7rem;}
+.tl-note.bloom-note{background:var(--rose-f);border-left:2px solid var(--rose);color:var(--rose);padding:6px 10px;border-radius:0 8px 8px 0;margin-top:6px;font-size:0.92rem;}
+[data-theme="pro"] .tl-note.bloom-note{border-radius:0 2px 2px 0;font-size:0.7rem;}
+.tl-note.preheat-note{background:var(--accent-f);border-left:2px solid var(--accent-lt);color:var(--accent);padding:6px 10px;border-radius:0 8px 8px 0;margin-top:6px;font-size:0.92rem;}
+[data-theme="artisan"] .tl-note.preheat-note{color:#7a4510;border-left-color:var(--accent-lt);}
+[data-theme="pro"] .tl-note.preheat-note{border-radius:0 2px 2px 0;font-size:0.7rem;}
+
+/* Wisdom */
+.wisdom{font-family:var(--label-font);font-size:1rem;color:var(--ink3);padding:14px 16px;background:var(--sub);border-left:3px solid var(--accent-lt);border-radius:0 10px 10px 0;margin-top:16px;line-height:1.5;}
+[data-theme="pro"] .wisdom{font-family:var(--num-font);font-size:0.7rem;line-height:1.6;border-radius:0 2px 2px 0;border-left:2px solid var(--border);letter-spacing:0.02em;}
+
+.right-col{display:flex;flex-direction:column;gap:18px;}
+
+/* Pro status bar */
+.pro-status{display:none;grid-column:1/-1;font-family:var(--num-font);font-size:0.68rem;color:var(--ink3);border-top:1px solid var(--border);padding-top:12px;letter-spacing:0.04em;flex-wrap:wrap;gap:20px;}
+[data-theme="artisan"] .pro-status{display:none!important;}
+[data-theme="pro"] .pro-status{display:flex;}
+</style>
+</head>
+<body>
+
+<div class="floaters" id="floaters"></div>
+<div id="offlineBadge">OFFLINE</div>
+
+<!-- Install banner (shown on first visit if installable) -->
+<div id="installBanner" class="hidden">
+  <div class="install-text">
+    <strong>Add Omar Pita to your home screen</strong><br>
+    Works offline · feels like an app
+  </div>
+  <div style="display:flex;gap:8px;">
+    <button onclick="installApp()">Install</button>
+    <button onclick="document.getElementById('installBanner').classList.add('hidden')" style="background:transparent;border-color:rgba(255,255,255,0.2);">✕</button>
+  </div>
+</div>
+
+<div class="page">
+
+<div class="theme-bar">
+  <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">
+    <div class="toggle-icon"></div>
+    <span id="themeLabel">PROFESSIONAL MODE</span>
+  </button>
+</div>
+
+<header class="header">
+  <div class="header-eyebrow" id="headerEyebrow">✦ a bread calculator, with feeling ✦</div>
+  <h1>Omar <span>Pita</span></h1>
+  <div class="header-sub" id="headerSub">I thought carefully about every gram. You're welcome.</div>
+  <div class="version-badge">v34.0 · PWA · offline-ready · science-verified</div>
+</header>
+
+<div style="display:flex;flex-direction:column;gap:18px;">
+
+  <!-- CARD 1 -->
+  <div class="card">
+    <div class="card-title"><span class="num">1</span> How much bread, and when?</div>
+    <span class="section-label">target bake time</span>
+    <input type="datetime-local" id="targetBake">
+    <span class="section-label">quantity</span>
+    <div class="slider-wrap" style="margin-bottom:10px;">
+      <div class="slider-head"><span class="slider-name">number of pitas</span><span class="slider-val" id="countVal">8</span></div>
+      <input type="range" id="countSlider" min="1" max="50" value="8" step="1">
+    </div>
+    <div class="slider-wrap" style="margin-bottom:10px;">
+      <div class="slider-head"><span class="slider-name">weight per pita</span><span class="slider-val" id="sizeVal">85 g</span></div>
+      <input type="range" id="sizeSlider" min="40" max="150" step="5" value="85">
+    </div>
+    <div class="pill-row">
+      <button class="pill" onclick="setQuick(50)">mini · 50g</button>
+      <button class="pill on" id="quickPill85" onclick="setQuick(85)">standard · 85g</button>
+      <button class="pill" onclick="setQuick(110)">large · 110g</button>
+    </div>
+    <span class="section-label">fermentation mode</span>
+    <div class="mode-row">
+      <button class="mode-btn" id="modeRapid" onclick="setMode('rapid')"><span class="emoji">⚡</span>Rapid</button>
+      <button class="mode-btn" id="modeSlow"  onclick="setMode('slow')"><span class="emoji">🌙</span>Slow</button>
+      <button class="mode-btn on" id="modeSour" onclick="setMode('sour')"><span class="emoji">🍋</span>Sourdough</button>
+    </div>
+  </div>
+
+  <!-- CARD 2 -->
+  <div class="card">
+    <div class="card-title"><span class="num">2</span> Your kitchen, your tools</div>
+    <span class="section-label">oven</span>
+    <div class="mode-row">
+      <button class="mode-btn on" id="ovenSteel" onclick="setOven('steel')">
+        <span class="emoji">🏠</span>Home Steel
+        <small style="display:block;font-size:0.68rem;opacity:0.6;margin-top:1px;">550°F</small>
+      </button>
+      <button class="mode-btn" id="ovenGozney" onclick="setOven('gozney')">
+        <span class="emoji">🔥</span>Gozney Dome
+        <small style="display:block;font-size:0.68rem;opacity:0.6;margin-top:1px;">700–900°F</small>
+      </button>
+    </div>
+    <span class="section-label">mixer</span>
+    <div class="mixer-row">
+      <button class="mixer-btn on" id="mixerHand"   onclick="setMixer('hand')">  <span class="emoji">🤲</span>Hand mix</button>
+      <button class="mixer-btn"    id="mixerKA"     onclick="setMixer('ka')">    <span class="emoji">🍶</span>KitchenAid</button>
+      <button class="mixer-btn"    id="mixerSpiral" onclick="setMixer('spiral')"><span class="emoji">🌀</span>Ooni Halo<br><small>spiral</small></button>
+      <button class="mixer-btn"    id="mixerFP"     onclick="setMixer('fp')">    <span class="emoji">⚙️</span>Food<br>processor</button>
+    </div>
+    <div class="mixer-rec"  id="mixerRec"></div>
+    <div class="mixer-warn" id="mixerWarn"></div>
+  </div>
+
+  <!-- CARD 3 -->
+  <div class="card">
+    <div class="card-title"><span class="num">3</span> The chemistry bit</div>
+    <span class="section-label">flour</span>
+    <div class="pill-row">
+      <button class="pill"    id="flourAP"    onclick="setFlour('AP')">all-purpose</button>
+      <button class="pill on" id="flourBread" onclick="setFlour('Bread')">bread flour</button>
+    </div>
+    <div id="sourInocWrap">
+      <div class="slider-wrap" style="background:var(--accent-f);padding:12px;border-radius:var(--btn-radius);border:1px solid rgba(193,123,58,0.15)">
+        <div class="slider-head"><span class="slider-name">starter inoculation</span><span class="slider-val" id="inocVal">20%</span></div>
+        <input type="range" id="inocSlider" min="5" max="40" step="5" value="20">
+        <div style="font-family:var(--num-font);font-size:0.7rem;color:var(--ink3);margin-top:6px;">assumes 100% hydration starter</div>
+      </div>
+    </div>
+    <div id="yeastWrap" style="display:none">
+      <span class="section-label">yeast type</span>
+      <div class="pill-row">
+        <button class="pill on" id="yeastADY" onclick="setYeast('ADY')">active dry</button>
+        <button class="pill"    id="yeastIDY" onclick="setYeast('IDY')">instant</button>
+      </div>
+    </div>
+    <div class="slider-wrap">
+      <div class="slider-head"><span class="slider-name">hydration</span><span class="slider-val" id="hydVal">65%</span></div>
+      <input type="range" id="hydSlider" min="50" max="85" step="0.5" value="65">
+    </div>
+    <button class="auto-btn on" id="autoBtn" onclick="toggleAuto()">✦ 30-minute autolyse protocol</button>
+  </div>
+
+  <!-- CARD 4 -->
+  <div class="card">
+    <div class="card-title"><span class="num">4</span> <span id="card4Title">The slow magic</span></div>
+    <div class="subsection">
+      <div class="slider-wrap">
+        <div class="slider-head"><span class="slider-name">room temperature</span><span class="slider-val" id="tempVal">72 °F</span></div>
+        <input type="range" id="tempSlider" min="60" max="90" value="72" step="1">
+      </div>
+      <div class="slider-wrap" style="margin-bottom:0">
+        <div class="slider-head"><span class="slider-name">bulk fermentation</span><span class="slider-val" id="bulkVal">4.0 h</span></div>
+        <input type="range" id="bulkSlider" min="0.5" max="12" step="0.5" value="4.0">
+      </div>
+    </div>
+    <div class="subsection" id="fridgeBox">
+      <div class="slider-wrap">
+        <div class="slider-head"><span class="slider-name">fridge temperature</span><span class="slider-val" id="fTempVal">39 °F</span></div>
+        <input type="range" id="fTempSlider" min="34" max="45" value="39" step="1">
+      </div>
+      <div class="slider-wrap" style="margin-bottom:0">
+        <div class="slider-head"><span class="slider-name">retard time</span><span class="slider-val" id="fTimeVal">24 h</span></div>
+        <input type="range" id="fTimeSlider" min="0" max="96" step="6" value="24">
+      </div>
+    </div>
+    <div>
+      <div class="ferment-label"><span>fermentation activity</span><span id="actVal">—</span></div>
+      <div class="ferment-meter"><div class="ferment-bar" id="actBar"></div></div>
+      <div class="ferment-label"><span style="color:#7ec8e3">under</span><span>ideal zone</span><span style="color:#ff7043">over</span></div>
+    </div>
+    <div class="warn-box" id="warnBox"></div>
+  </div>
+</div>
+
+<!-- RIGHT COLUMN -->
+<div class="right-col">
+  <div class="card">
+    <div class="card-title">The recipe</div>
+    <div id="recipe"></div>
+    <div class="ddt-box" id="ddtBox"></div>
+    <div class="batch-total" id="massSumm"></div>
+  </div>
+  <div class="card">
+    <div class="card-title" style="justify-content:space-between;">
+      <span id="timelineTitle">Your timeline</span>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <button class="pill" id="tempUnitBtn" onclick="toggleCelsius()" style="font-style:normal;font-size:0.72rem;padding:4px 10px;">→ °C</button>
+        <button class="pill" onclick="printCard()" style="font-style:normal;font-size:0.72rem;padding:4px 10px;">🖨 print</button>
+      </div>
+    </div>
+    <ul class="timeline" id="schedule"></ul>
+    <div class="wisdom" id="wisdom"></div>
+  </div>
+</div>
+
+<div class="pro-status" id="proStatus"></div>
+
+</div><!-- end page -->
+
+<script>
+// ─── SERVICE WORKER REGISTRATION ──────────────────────────────────────────────
+// Registers ./sw.js — upload this file alongside index.html on GitHub Pages
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js', {scope: './'})
+      .then(reg => console.log('Omar Pita SW registered:', reg.scope))
+      .catch(err => console.log('SW not available:', err));
+  });
+}
+
+// ─── OFFLINE DETECTION ────────────────────────────────────────────────────────
+function updateOnlineStatus(){
+  const badge = document.getElementById('offlineBadge');
+  badge.style.display = navigator.onLine ? 'none' : 'block';
+}
+window.addEventListener('online',  updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+updateOnlineStatus();
+
+// ─── PWA INSTALL PROMPT ───────────────────────────────────────────────────────
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Show install banner after 3 seconds
+  setTimeout(() => {
+    const banner = document.getElementById('installBanner');
+    if (!localStorage.getItem('installDismissed')) {
+      banner.classList.remove('hidden');
+    }
+  }, 3000);
+});
+
+function installApp() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(result => {
+      deferredPrompt = null;
+      document.getElementById('installBanner').classList.add('hidden');
+      if (result.outcome === 'accepted') localStorage.setItem('installDismissed', '1');
+    });
+  }
+  document.getElementById('installBanner').classList.add('hidden');
+  localStorage.setItem('installDismissed', '1');
+}
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let mode='sour',isAuto=true,flour='Bread',yeast='ADY';
+let oven='steel',mixer='hand',useCelsius=false,theme='artisan';
+
+// Persist settings across sessions
+function saveState(){
+  try{localStorage.setItem('omarPitaState',JSON.stringify({mode,isAuto,flour,yeast,oven,mixer,useCelsius,theme,
+    hyd:document.getElementById('hydSlider').value,
+    count:document.getElementById('countSlider').value,
+    size:document.getElementById('sizeSlider').value,
+    bulk:document.getElementById('bulkSlider').value,
+    fTime:document.getElementById('fTimeSlider').value,
+    rT:document.getElementById('tempSlider').value,
+    fT:document.getElementById('fTempSlider').value,
+    inoc:document.getElementById('inocSlider').value,
+  }));}catch(e){}
+}
+function loadState(){
+  try{
+    const s=JSON.parse(localStorage.getItem('omarPitaState')||'{}');
+    if(s.mode)mode=s.mode;
+    if(s.isAuto!==undefined)isAuto=s.isAuto;
+    if(s.flour)flour=s.flour;
+    if(s.yeast)yeast=s.yeast;
+    if(s.oven)oven=s.oven;
+    if(s.mixer)mixer=s.mixer;
+    if(s.useCelsius!==undefined)useCelsius=s.useCelsius;
+    if(s.theme){theme=s.theme;document.documentElement.setAttribute('data-theme',theme);}
+    if(s.hyd)document.getElementById('hydSlider').value=s.hyd;
+    if(s.count)document.getElementById('countSlider').value=s.count;
+    if(s.size)document.getElementById('sizeSlider').value=s.size;
+    if(s.bulk)document.getElementById('bulkSlider').value=s.bulk;
+    if(s.fTime)document.getElementById('fTimeSlider').value=s.fTime;
+    if(s.rT)document.getElementById('tempSlider').value=s.rT;
+    if(s.fT)document.getElementById('fTempSlider').value=s.fT;
+    if(s.inoc)document.getElementById('inocSlider').value=s.inoc;
+  }catch(e){}
+}
+
+// Init date
+const initD=new Date();initD.setHours(initD.getHours()+36,0,0,0);
+document.getElementById('targetBake').value=new Date(initD.getTime()-initD.getTimezoneOffset()*60000).toISOString().slice(0,16);
+
+// Floaters
+['🫓','🌾','✦','◦','·','∘'].forEach(em=>{
+  for(let j=0;j<3;j++){
+    const el=document.createElement('div');el.className='floater';el.textContent=em;
+    el.style.cssText=`left:${Math.random()*100}%;font-size:${1+Math.random()*2}rem;animation-duration:${18+Math.random()*24}s;animation-delay:${-Math.random()*30}s`;
+    document.getElementById('floaters').appendChild(el);
+  }
+});
+
+document.querySelectorAll('input[type=range],input[type=datetime-local]').forEach(el=>el.addEventListener('input',()=>{update();saveState();}));
+
+// ─── THEME ────────────────────────────────────────────────────────────────────
+function toggleTheme(){
+  theme=theme==='artisan'?'pro':'artisan';
+  document.documentElement.setAttribute('data-theme',theme);
+  document.getElementById('themeLabel').textContent=theme==='pro'?'ARTISAN MODE':'PROFESSIONAL MODE';
+  document.getElementById('themeColor').content=theme==='pro'?'#0f1117':'#fdf8f0';
+  updateThemeText();saveState();
+}
+function updateThemeText(){
+  const isPro=theme==='pro';
+  document.getElementById('headerEyebrow').textContent=isPro?'OMAR PITA MASTER · PRODUCTION CALCULATOR':'✦ a bread calculator, with feeling ✦';
+  document.getElementById('headerSub').textContent=isPro?'':'I thought carefully about every gram. You\'re welcome.';
+  document.getElementById('card4Title').textContent=isPro?'FERMENTATION PARAMETERS':'The slow magic';
+  document.getElementById('timelineTitle').textContent=isPro?'PRODUCTION SCHEDULE':'Your timeline';
+}
+
+// ─── VERIFIED CONFIG ──────────────────────────────────────────────────────────
+const HYD_DEFAULTS={steel:{AP:62,Bread:65},gozney:{AP:60,Bread:63}};
+
+// Friction factors sourced: King Arthur Baking (hand, KA), Hamelman (spiral), high-shear estimate (FP)
+const MIXER_CFG={
+  hand:  {frictionF:7,  mixMins:[10,15],autoDefault:true, autoLock:null,           minG:0,   maxG:Infinity},
+  ka:    {frictionF:23, mixMins:[8,10], autoDefault:true, autoLock:null,           minG:400, maxG:1800},
+  spiral:{frictionF:14, mixMins:[4,6],  autoDefault:false,autoLock:'suggest-off',  minG:1000,maxG:5000},
+  fp:    {frictionF:25, mixMins:[1,1],  autoDefault:false,autoLock:'off',          minG:0,   maxG:800},
+};
+const OVEN_CFG={
+  steel: {preheatMins:60,bakeNote:'2–3 min per batch · flip at 90 sec · look for char spots'},
+  gozney:{preheatMins:20,bakeNote:'60–90 sec total · no flip · watch colour every 15 sec'},
+};
+const MIXER_LIMITS={hand:{min:0,max:Infinity},ka:{min:400,max:1800},spiral:{min:1000,max:5000},fp:{min:0,max:800}};
+function mixerRecommendation(m){
+  if(m<400)  return{mixer:'hand',  reason:'hand mix or food processor — batch too small for stand mixers'};
+  if(m<800)  return{mixer:'fp',    reason:'food processor or hand mix — ideal range for both'};
+  if(m<1000) return{mixer:'ka',    reason:'KitchenAid — sweet spot for this batch'};
+  if(m<=1800)return{mixer:'ka',    reason:'KitchenAid or Ooni Halo Pro — both ideal'};
+  if(m<=5000)return{mixer:'spiral',reason:'Ooni Halo Pro — ideal range for spiral'};
+  return{mixer:'spiral',reason:'consider splitting — exceeds Halo Pro max (5kg)'};
+}
+const ACTIVITY_UNDER=1.8,ACTIVITY_OVER=9.0,BLOOM_MINS=10;
+
+// ─── MATH ENGINE v32.0 ───────────────────────────────────────────────────────
+function flourBase(totalMass,hyd){return totalMass/(1+hyd+0.018+0.06+0.04+0.02+0.005);}
+function fridgeSuppression(fT){return 0.08+(fT-34)*(0.16/16);}
+function calcActivity(bH,rT,fH,fT,autolyseOn,inocPct,isSour){
+  const q10r=Math.pow(2,(rT-77)/18),q10f=Math.pow(2,(fT-77)/18);
+  let eb=bH;
+  if(isSour&&inocPct<0.08){const lagH=0.5+(0.08-inocPct)*(2.5/0.08);eb=Math.max(0,bH-lagH);}
+  let bulk=eb*q10r*0.90;
+  if(autolyseOn&&eb>0)bulk+=Math.min(0.5,eb)*q10r*0.12;
+  return bulk+fH*fridgeSuppression(fT)*q10f;
+}
+function calcGlide(totalMass,count,rT,fT,fH){
+  if(fH===0)return 0;
+  const mp=Math.max(1,totalMass/Math.max(1,count));
+  const tau=2.7*Math.pow(mp,0.4);
+  const delta=rT-fT;
+  if(delta<=10)return 0;
+  return Math.max(0,Math.round(tau*Math.log(delta/10)/5)*5);
+}
+function calcDDT(rT,frictionF,isSour){
+  return isSour?(76*4)-(3*rT)-frictionF:(77*3)-(2*rT)-frictionF;
+}
+function calcIce(totalWaterG,targetF,rT){
+  if(targetF>=50||targetF>=rT-2)return null;
+  const iceG=Math.max(0,totalWaterG*(rT-targetF)/(144+targetF-32));
+  if(iceG<1)return null;
+  return{iceG:Math.round(iceG),waterG:Math.round(totalWaterG-iceG)};
+}
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+function fmt(dt){return dt.toLocaleString([],{weekday:'short',hour:'2-digit',minute:'2-digit'});}
+function fmtTemp(f){return useCelsius?((f-32)*5/9).toFixed(1)+' °C':Math.round(f)+' °F';}
+function popVal(id){const el=document.getElementById(id);if(!el)return;el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop');}
+function setVal(id,text){const el=document.getElementById(id);if(el&&el.textContent!==String(text)){el.textContent=text;popVal(id);}}
+function snapHyd(){document.getElementById('hydSlider').value=(HYD_DEFAULTS[oven]||HYD_DEFAULTS.steel)[flour]||65;}
+
+// ─── CONTROLS ────────────────────────────────────────────────────────────────
+function setMode(m){mode=m;if(m==='rapid')document.getElementById('fTimeSlider').value=0;if(m==='sour'){flour='Bread';isAuto=true;snapHyd();}update();saveState();}
+function setOven(o){oven=o;snapHyd();update();saveState();}
+function setMixer(mx){
+  mixer=mx;const cfg=MIXER_CFG[mx];
+  if(cfg.autoLock==='off')isAuto=false;
+  else if(cfg.autoLock==='suggest-off')isAuto=false;
+  else isAuto=cfg.autoDefault;
+  update();saveState();
+}
+function setFlour(f){flour=f;snapHyd();if(f==='AP'&&MIXER_CFG[mixer].autoLock!=='off')isAuto=false;update();saveState();}
+function setYeast(y){yeast=y;update();saveState();}
+function toggleAuto(){const cfg=MIXER_CFG[mixer];if(mode!=='sour'&&flour!=='AP'&&cfg.autoLock!=='off'){isAuto=!isAuto;update();saveState();}}
+function setQuick(v){document.getElementById('sizeSlider').value=v;update();saveState();}
+function toggleCelsius(){useCelsius=!useCelsius;update();saveState();}
+
+// ─── INGREDIENT CONFIG ────────────────────────────────────────────────────────
+const ingCfg={
+  starter:{emoji:'🍋',label:'sourdough starter'},yeast:{emoji:'🌿',label:'yeast'},
+  flour:  {emoji:'🌾',label:'flour'},            water:{emoji:'💧',label:'water'},
+  salt:   {emoji:'🧂',label:'sea salt'},          oil:  {emoji:'🫒',label:'olive oil (evoo)'},
+  milk:   {emoji:'🥛',label:'milk powder'},       sugar:{emoji:'🍯',label:'sugar'},
+  mahlab: {emoji:'✦', label:'mahlab'},
+};
+function ingRow(key,grams,dec){
+  const c=ingCfg[key];
+  return `<div class="recipe-item"><span class="ing-name"><span class="ing-emoji">${c.emoji}</span>${c.label}</span><span class="ing-weight">${dec?grams.toFixed(dec):Math.round(grams)} g</span></div>`;
+}
+
+// ─── MAIN UPDATE ──────────────────────────────────────────────────────────────
+function update(){
+  const isSour=mode==='sour';
+  const isPro=theme==='pro';
+
+  // Button states
+  ['Rapid','Slow','Sour'].forEach(m=>document.getElementById('mode'+m).classList.toggle('on',mode===m.toLowerCase()));
+  document.getElementById('ovenSteel').classList.toggle('on',oven==='steel');
+  document.getElementById('ovenGozney').classList.toggle('on',oven==='gozney');
+  ['Hand','KA','Spiral','FP'].forEach(mx=>document.getElementById('mixer'+mx).classList.toggle('on',mixer===mx.toLowerCase()));
+
+  document.getElementById('sourInocWrap').style.display=isSour?'':'none';
+  document.getElementById('yeastWrap').style.display=isSour?'none':'';
+
+  if(isSour)flour='Bread';
+  document.getElementById('flourAP').classList.toggle('on',flour==='AP');
+  document.getElementById('flourBread').classList.toggle('on',flour==='Bread');
+  document.getElementById('flourAP').classList.toggle('locked',isSour);
+  document.getElementById('yeastADY').classList.toggle('on',yeast==='ADY');
+  document.getElementById('yeastIDY').classList.toggle('on',yeast==='IDY');
+
+  const fb2=document.getElementById('fridgeBox');
+  fb2.style.opacity=mode==='rapid'?'0.3':'1';
+  fb2.style.pointerEvents=mode==='rapid'?'none':'';
+
+  // Autolyse button
+  const btn=document.getElementById('autoBtn');
+  const mcfg=MIXER_CFG[mixer];
+  if(isSour){
+    btn.textContent=isPro?'AUTOLYSE: LOCKED ON (SOURDOUGH)':'✦ autolyse always on · (sourdough locked)';
+    btn.className='auto-btn on locked';
+  }else if(flour==='AP'){
+    btn.textContent=isPro?'AUTOLYSE: OFF (AP FLOUR)':'✦ no autolyse with all-purpose flour';
+    btn.className='auto-btn locked';
+  }else if(mcfg.autoLock==='off'){
+    btn.textContent=isPro?'AUTOLYSE: N/A (FOOD PROCESSOR)':'✦ autolyse not needed — food processor develops gluten instantly';
+    btn.className='auto-btn locked';
+  }else if(mcfg.autoLock==='suggest-off'){
+    btn.textContent=isPro?(isAuto?'AUTOLYSE: ON (OPTIONAL FOR SPIRAL)':'AUTOLYSE: OFF'):(isAuto?'✦ autolyse · on (spiral rarely needs it — your call)':'✦ autolyse · off');
+    btn.className='auto-btn'+(isAuto?' on':'');
+  }else{
+    const handNote=(!isPro&&mixer==='hand')?' · (saves your arms — do it)':'';
+    btn.textContent=isPro?(isAuto?'AUTOLYSE: ON · 30 MIN REST':'AUTOLYSE: OFF'):(isAuto?`✦ 30-minute autolyse · on${handNote}`:'✦ 30-minute autolyse · off');
+    btn.className='auto-btn'+(isAuto?' on':'');
+  }
+
+  // Read sliders
+  const count=+document.getElementById('countSlider').value;
+  const size =+document.getElementById('sizeSlider').value;
+  const hyd  =+document.getElementById('hydSlider').value/100;
+  const bH   =+document.getElementById('bulkSlider').value;
+  const fH   =+document.getElementById('fTimeSlider').value;
+  const rT   =+document.getElementById('tempSlider').value;
+  const fT   =+document.getElementById('fTempSlider').value;
+  const inoc =+document.getElementById('inocSlider').value/100;
+  const totalMass=count*size;
+
+  setVal('countVal',count);
+  setVal('sizeVal',size+' g');
+  setVal('hydVal',(+document.getElementById('hydSlider').value).toFixed(1)+'%');
+  setVal('bulkVal',bH+' h');
+  setVal('fTimeVal',fH+' h');
+  setVal('tempVal',fmtTemp(rT));
+  setVal('fTempVal',fmtTemp(fT));
+  setVal('inocVal',Math.round(inoc*100)+'%');
+
+  const tub=document.getElementById('tempUnitBtn');
+  if(tub)tub.textContent=useCelsius?'→ °F':'→ °C';
+
+  [50,85,110].forEach(s=>{
+    const el=document.getElementById('quickPill'+s)||[...document.querySelectorAll('.pill')].find(b=>b.textContent.includes(s+'g'));
+    if(el)el.classList.toggle('on',size===s);
+  });
+
+  // Mixer recommendation + warnings
+  const rec=mixerRecommendation(totalMass);
+  const recEl=document.getElementById('mixerRec');
+  const warnEl=document.getElementById('mixerWarn');
+  recEl.textContent=(isPro?'REC: ':'✦ ')+`${totalMass}g — ${rec.reason}`;
+  recEl.style.display='block';
+  const isMatch=rec.mixer===mixer;
+  recEl.style.color=isMatch?'var(--teal)':'var(--ink3)';
+  recEl.style.background=isMatch?'var(--teal-f)':'transparent';
+  recEl.style.border=isMatch?'1px solid rgba(45,125,114,0.2)':'1px solid var(--border)';
+
+  warnEl.className='mixer-warn';warnEl.style.display='none';
+  if(mixer==='spiral'&&totalMass<MIXER_LIMITS.spiral.min){
+    const need=Math.ceil(MIXER_LIMITS.spiral.min/size);
+    warnEl.className='mixer-warn hard';warnEl.style.display='block';
+    warnEl.textContent=`⚠ Ooni Halo Pro min: 1kg (manufacturer spec) — need at least ${need} pitas at ${size}g`;
+  }else if(mixer==='spiral'&&totalMass>MIXER_LIMITS.spiral.max){
+    warnEl.className='mixer-warn hard';warnEl.style.display='block';
+    warnEl.textContent='⚠ Ooni Halo Pro max: 5kg (manufacturer spec) — split into two batches';
+  }else if(mixer==='ka'&&totalMass<MIXER_LIMITS.ka.min){
+    warnEl.className='mixer-warn soft';warnEl.style.display='block';
+    warnEl.textContent='→ below 400g the KitchenAid hook won\'t grip well — hand or food processor preferred';
+  }else if(mixer==='ka'&&totalMass>MIXER_LIMITS.ka.max){
+    warnEl.className='mixer-warn soft';warnEl.style.display='block';
+    warnEl.textContent='→ above 1.8kg exceeds KitchenAid manual limit — consider Ooni Halo Pro';
+  }else if(mixer==='fp'&&totalMass>MIXER_LIMITS.fp.max){
+    warnEl.className='mixer-warn soft';warnEl.style.display='block';
+    warnEl.textContent='→ above 800g enriched dough crowds the food processor — split or switch to KitchenAid';
+  }
+
+  // Fermentation activity
+  const activity=calcActivity(bH,rT,fH,fT,isAuto,inoc,isSour);
+  setVal('actVal',activity.toFixed(2));
+  const pct=Math.min(100,(activity/ACTIVITY_OVER)*100);
+  const bar=document.getElementById('actBar');
+  bar.style.width=pct+'%';
+  if(activity<ACTIVITY_UNDER)bar.style.background='#7ec8e3';
+  else if(activity>ACTIVITY_OVER)bar.style.background='#ff7043';
+  else{const t=(activity-ACTIVITY_UNDER)/(ACTIVITY_OVER-ACTIVITY_UNDER);bar.style.background=`hsl(${Math.round(160-t*120)},60%,55%)`;}
+
+  const warn=document.getElementById('warnBox');
+  warn.className='warn-box';
+  if(activity<ACTIVITY_UNDER){warn.className='warn-box under';warn.textContent=isPro?`UNDER-FERMENTED: activity ${activity.toFixed(2)} < ${ACTIVITY_UNDER}`:'🧊 this dough might not be ready — more bulk time or warmth would help';}
+  else if(activity>ACTIVITY_OVER){warn.className='warn-box over';warn.textContent=isPro?`OVER-FERMENTED: activity ${activity.toFixed(2)} > ${ACTIVITY_OVER}`:'🫠 very active dough — risk of overproofing';}
+  else if(oven==='gozney'){warn.className='warn-box over';warn.textContent=isPro?'GOZNEY: 700°F+ — pita puffs in 60–90 sec. Monitor sugar browning.':'🔥 Gozney: at 700°F+ pita puffs in 60–90 sec. Sugar browns fast — stay close.';}
+  else if(fT>=43){warn.className='warn-box over';warn.textContent=isPro?`FRIDGE ${fT}°F ≥ 43°F: slow fermentation active`:'🌡️ at 43°F+ your fridge is fermenting as much as retarding — watch your dough';}
+
+  // Recipe math
+  const fb=flourBase(totalMass,hyd);
+  let sW=0,fF=fb,fW=fb*hyd;
+  let html='';
+  if(isSour){
+    sW=fb*inoc;fF=fb-(sW/2);fW=Math.max(0,(fb*hyd)-(sW/2));
+    html+=ingRow('starter',sW);
+  }else{
+    const refActivity=3.6;
+    const yPct=Math.min(0.02,Math.max(0.0005,0.005*(refActivity/activity)))*(yeast==='IDY'?0.75:1);
+    const yG=fb*yPct;
+    const c=ingCfg['yeast'];
+    html+=`<div class="recipe-item"><span class="ing-name"><span class="ing-emoji">${c.emoji}</span>${yeast==='IDY'?'instant':'active dry'} yeast</span><span class="ing-weight">${Math.max(0.1,yG-0.1).toFixed(1)}–${(yG+0.1).toFixed(1)} g</span></div>`;
+  }
+  html+=ingRow('flour',fF);html+=ingRow('water',fW);html+=ingRow('salt',fb*0.018);
+  html+=ingRow('oil',fb*0.06);html+=ingRow('milk',fb*0.04);html+=ingRow('sugar',fb*0.02);
+  html+=ingRow('mahlab',fb*0.005,1);
+  document.getElementById('recipe').innerHTML=html;
+  document.getElementById('massSumm').innerHTML=`<strong>${totalMass} g</strong> total · ${count} × ${size} g`;
+
+  // DDT + Ice
+  const frictionF=mcfg.frictionF;
+  const waterTempF=calcDDT(rT,frictionF,isSour);
+  const ice=calcIce(fW,waterTempF,rT);
+  const mr=mcfg.mixMins;
+  const DDT_TARGET=isSour?76:77;
+  let ddtHTML=`<div class="ddt-title">${isPro?'DDT':'✦ desired dough temperature'} · ${DDT_TARGET}°F · ${isSour?'4-factor / sourdough':'3-factor / yeasted'}</div>`;
+  ddtHTML+=`<div>use water at <span class="ddt-temp">${fmtTemp(waterTempF)}</span>`;
+  if(waterTempF>=rT-2)ddtHTML+=` <em style="color:var(--ink3);font-size:0.88rem">— room temp</em>`;
+  else if(waterTempF>=50)ddtHTML+=` <em style="color:var(--ink3);font-size:0.88rem">— cold tap</em>`;
+  ddtHTML+=`</div>`;
+  if(isSour)ddtHTML+=`<div style="font-size:0.75rem;color:var(--ink3);margin-top:3px;">starter temp assumed = room temp · adjust if using cold starter</div>`;
+  if(ice)ddtHTML+=`<div class="ice-line">🧊 ${ice.waterG} g cold water + ${ice.iceG} g ice${isPro?' (latent heat: 80 cal/g, 0.556 cal/g/°F)':' · if freezer ice <20°F use ~8% less'}</div>`;
+  ddtHTML+=`<div style="font-size:0.75rem;color:var(--ink3);margin-top:5px;">${isPro?'MIX':'mix'}: ${mr[0]===mr[1]?mr[0]:mr[0]+'–'+mr[1]} min · friction: ${frictionF}°F</div>`;
+  document.getElementById('ddtBox').innerHTML=ddtHTML;
+
+  // Timeline (chronological sort + past detection)
+  const target=new Date(document.getElementById('targetBake').value);
+  const tBake=target.getTime();
+  const oCfg=OVEN_CFG[oven];
+  const tPreheat=new Date(tBake-oCfg.preheatMins*60000);
+  const tRoll=new Date(tBake-20*60000);
+  const tBall=new Date(tRoll.getTime()-40*60000);
+  const glide=calcGlide(totalMass,count,rT,fT,fH);
+  const tPull=new Date(tBall.getTime()-glide*60000);
+  const tFridge=new Date(tPull.getTime()-fH*3600000);
+  const needsBloom=!isSour&&yeast==='ADY';
+
+  // Bug fix: autolyseEffective — only true when all conditions genuinely met
+  const autolyseEffective=isAuto&&mode!=='rapid'&&flour!=='AP'&&MIXER_CFG[mixer].autoLock!=='off';
+  const tMix=new Date(tFridge.getTime()-bH*3600000-(autolyseEffective?30*60000:0));
+  const tBloom=new Date(tMix.getTime()-(needsBloom?BLOOM_MINS*60000:0));
+
+  const preheatNote=oven==='steel'
+    ?`${isPro?'':'place steel on top rack · '}crank to 550°F · ${oCfg.preheatMins} min minimum — steel must be fully saturated`
+    :`target 700–850°F · let floor stabilise ${oCfg.preheatMins} min before first load`;
+  const mixNote=autolyseEffective
+    ?(isPro?'flour + water only → rest 30 min → add remaining ingredients → knead':'combine flour + water only · rest uncovered 30 min · then add salt, oil, starter/yeast & knead')
+    :`combine all ingredients · knead · ${mr[0]===mr[1]?mr[0]:mr[0]+'–'+mr[1]} min`;
+
+  const events=[];
+  events.push({t:tPreheat,emoji:'🌡️',label:isPro?'PREHEAT':'preheat oven',note:preheatNote,nc:'preheat-note',extra:''});
+  if(needsBloom)events.push({t:tBloom,emoji:'🌸',label:isPro?'BLOOM YEAST':'bloom the yeast',note:isPro?'dissolve ADY in ~30g water at 105–110°F · 10 min · confirm foam before proceeding':'dissolve active dry yeast in ~30 g of your measured water · warm to 105–110°F · wait 10 min until foamy · no foam = dead yeast',nc:'bloom-note',extra:''});
+  events.push({t:tMix,emoji:'🥣',label:isPro?'MIX':'mix',note:mixNote,nc:'highlight',extra:''});
+  if(fH>0){
+    events.push({t:tFridge,emoji:'❄️',label:isPro?'RETARD':'into the fridge',note:'cover tightly · label with pull time',nc:'',extra:''});
+    events.push({t:tPull,emoji:'⏰',label:isPro?'PULL':'pull from fridge',note:glide>0?`temper ${glide} min on counter`:'bring to room temp before rolling',nc:'',extra:''});
+  }
+  events.push({t:tBall,emoji:'⚖️',label:isPro?'SCALE':'portion & ball',note:'±40 g tolerance · keep covered',nc:'',extra:''});
+  events.push({t:tRoll,emoji:'🔵',label:isPro?'ROLL':'roll & final proof',note:'3mm · flat · cover with damp cloth',nc:'',extra:''});
+  events.push({t:target,emoji:'🔥',label:isPro?'BAKE':'bake',note:`${oCfg.bakeNote} · ${count} pitas`,nc:'',extra:'bake'});
+  events.sort((a,b)=>a.t.getTime()-b.t.getTime());
+
+  const now=Date.now();
+  const hasPastSteps=events.some(ev=>ev.t.getTime()<now);
+  const pastWarning=hasPastSteps
+    ?`<div style="font-family:var(--num-font);font-size:0.75rem;background:var(--rose-f);color:var(--rose);border:1px solid rgba(255,92,92,0.25);border-radius:var(--btn-radius);padding:8px 12px;margin-bottom:14px;">${isPro?'⚠ ONE OR MORE STEPS ARE IN THE PAST — advance your bake time':'⚠ some steps have already passed — move your bake time forward'}</div>`
+    :'';
+
+  document.getElementById('schedule').innerHTML=pastWarning+events.map(ev=>{
+    const isPast=ev.t.getTime()<now;
+    return `<li class="tl-item ${ev.extra}" style="${isPast?'opacity:0.4;':''}">
+      <div class="tl-dot" style="${isPast?'border-color:var(--rose);color:var(--rose);':''}">${isPast?'✗':ev.emoji}</div>
+      <div>
+        <span class="tl-time" style="${isPast?'color:var(--rose);':''}">${fmt(ev.t)}${isPast?' · PAST':''}</span>
+        <span class="tl-label" style="${isPast?'text-decoration:line-through;':''}">${ev.label}</span>
+        ${ev.note&&!isPast?`<span class="tl-note ${ev.nc}">${ev.note}</span>`:''}
+      </div>
+    </li>`;
+  }).join('');
+
+  // Pro status bar
+  if(isPro){
+    document.getElementById('proStatus').innerHTML=
+      `<span>ACTIVITY: ${activity.toFixed(3)}</span><span>Q10 REF: 77°F</span>`+
+      `<span>SALT −10%</span><span>FRICTION: ${frictionF}°F</span>`+
+      `<span>DDT: ${DDT_TARGET}°F</span><span>GLIDE: ${glide} min</span>`+
+      `<span>FRIDGE SUPP: ${fridgeSuppression(fT).toFixed(3)}</span><span>FLOUR BASE: ${Math.round(fb)}g</span>`;
+  }
+
+  // Wisdom
+  const techNotes=[
+    `activity ${activity.toFixed(2)} · Q10: ${Math.pow(2,(rT-77)/18).toFixed(3)} · fridge suppression: ${fridgeSuppression(fT).toFixed(3)} · salt −10%`,
+    `DDT: (${isSour?76:77}×${isSour?4:3}) − ${isSour?3:2}×${rT} − ${frictionF} = ${Math.round(waterTempF)}°F target water`,
+    `glide: τ=${(2.7*Math.pow(Math.max(1,totalMass/Math.max(1,count)),0.4)).toFixed(1)} min · ln(${rT-fT}/10) → ${glide} min`,
+    `yeast: 0.5% at ref 3.6 · capped 2% · IDY 75% of ADY · flour base: ${Math.round(fb)}g`,
+    `ice: ${ice?ice.iceG+'g ice + '+ice.waterG+'g water':'not needed'} · latent heat 80 cal/g · 0.556 cal/g/°F`,
+  ];
+  const artisanWisdoms=[
+    'EVOO at 6% and Mahlab at 0.5% — not negotiable. They are what make it <em>Omar\'s</em> pita.',
+    'The mahlab is doing something almost imperceptible and completely essential. Trust it.',
+    isSour?'Sourdough patience is its own reward. The slow ferment builds flavour you can\'t rush.':'',
+    needsBloom?'If your ADY doesn\'t foam in 10 minutes, it\'s gone. Better to know now than at midnight.':'',
+    fH>48?'Long cold retards develop genuinely complex flavour. You\'re doing something right.':'',
+    count>20?'That\'s a lot of pitas. I respect it enormously.':'',
+    mixer==='hand'?'Hand mixing is the slowest and the most honest. You\'ll feel exactly when it\'s ready.':'',
+    mixer==='spiral'?'The Ooni Halo is efficient. Stop when the dough is smooth — over-mixing tightens it.':'',
+    mixer==='fp'?'Food processor: fast, hot, precise. The moment it comes together, stop.':'',
+    oven==='gozney'?'In the Gozney the pita will puff dramatically and fast. Stay close. Every second matters.':'',
+    oven==='steel'?'A fully preheated steel is the difference between pita and flatbread. Give it the full hour.':'',
+    ice?'The ice calculation is exact physics. Use a scale, not guesswork.':'',
+  ].filter(Boolean);
+  const wisdoms=isPro?techNotes:artisanWisdoms;
+  document.getElementById('wisdom').innerHTML=(isPro?'':' ✦ ')+wisdoms[Math.floor(Date.now()/10000)%wisdoms.length];
+}
+
+// Load saved state, then update
+loadState();
+updateThemeText();
+if(theme==='pro'){document.getElementById('themeLabel').textContent='ARTISAN MODE';}
+update();
+setInterval(update,10000);
+
+// ─── PRINT CARD ───────────────────────────────────────────────────────────────
+function printCard(){
+  const rHTML=document.getElementById('recipe').innerHTML;
+  const sHTML=document.getElementById('schedule').innerHTML;
+  const mHTML=document.getElementById('massSumm').innerHTML;
+  const wHTML=document.getElementById('wisdom').innerHTML;
+  const dHTML=document.getElementById('ddtBox').innerHTML;
+  const count=document.getElementById('countVal').textContent;
+  const size =document.getElementById('sizeVal').textContent;
+  const hyd  =document.getElementById('hydVal').textContent;
+  const rT   =document.getElementById('tempVal').textContent;
+  const fT   =document.getElementById('fTempVal').textContent;
+  const bulk =document.getElementById('bulkVal').textContent;
+  const fTime=document.getElementById('fTimeVal').textContent;
+  const tgt  =document.getElementById('targetBake').value;
+  const tFmt =new Date(tgt).toLocaleString([],{weekday:'long',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+  const oLabel={steel:'Home Steel 550°F',gozney:'Gozney Dome'}[oven];
+  const mLabel={hand:'Hand mix',ka:'KitchenAid',spiral:'Ooni Halo Spiral',fp:'Food Processor'}[mixer];
+  const isPro=theme==='pro';
+  const bg=isPro?'#0f1117':'#fdf8f0';
+  const cardBg=isPro?'#181c24':'#f7f0e3';
+  const border=isPro?'#262c38':'#efe6d3';
+  const ink=isPro?'#e8eaf0':'#2d2418';
+  const ink2=isPro?'#9aa0b0':'#5c4d38';
+  const ink3=isPro?'#525a70':'#9c8b72';
+  const accent=isPro?'#4a9eff':'#c17b3a';
+  const bodyFont=isPro?'Inter,system-ui,sans-serif':"'Fraunces',Georgia,serif";
+  const monoFont="'DM Mono','Courier New',monospace";
+  const handFont=isPro?'Inter,system-ui,sans-serif':"'Caveat',cursive";
+
+  const win=window.open('','_blank');
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Omar Pita</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,300;1,9..144,500&family=DM+Mono:wght@300;400&family=Caveat:wght@400;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:${bodyFont};background:${bg};color:${ink};padding:32px;max-width:760px;margin:0 auto;}
+h1{font-size:${isPro?'1.4rem':'2.2rem'};font-style:${isPro?'normal':'italic'};font-weight:${isPro?'600':'700'};letter-spacing:${isPro?'0.02em':'-0.02em'};}
+h1 span{color:${accent};}
+.ey{font-family:${isPro?monoFont:handFont};font-size:${isPro?'0.68rem':'1rem'};color:${accent};margin-bottom:6px;${isPro?'text-transform:uppercase;letter-spacing:0.1em;':''}}
+.meta{font-family:${monoFont};font-size:0.7rem;color:${ink3};margin-top:6px;margin-bottom:18px;letter-spacing:0.04em;}
+.params{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px;}
+.param{font-family:${monoFont};font-size:0.68rem;background:${border};color:${ink2};padding:3px 9px;border-radius:${isPro?'2px':'20px'};}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-bottom:18px;}
+.sec{font-family:${isPro?monoFont:handFont};font-size:${isPro?'0.68rem':'1.1rem'};color:${accent};margin-bottom:8px;border-bottom:1px ${isPro?'solid':'dashed'} ${border};padding-bottom:4px;${isPro?'text-transform:uppercase;letter-spacing:0.1em;':''}}
+.recipe-item{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px ${isPro?'solid':'dashed'} ${border};font-size:0.88rem;color:${ink2};}
+.recipe-item:last-child{border:none;}
+.ing-name{display:flex;align-items:center;gap:6px;font-style:${isPro?'normal':'italic'};}
+.ing-emoji{${isPro?'display:none;':''}}
+.ing-weight{font-family:${monoFont};font-size:0.82rem;${isPro?'color:'+accent+';':'background:'+border+';padding:2px 7px;border-radius:12px;'}}
+.ddt-box{background:${cardBg};border:1px solid ${border};border-radius:${isPro?'4px':'8px'};padding:10px 12px;margin-top:10px;font-family:${isPro?monoFont:handFont};font-size:0.85rem;color:${ink2};line-height:1.7;}
+.ddt-title{font-family:${monoFont};font-size:0.62rem;color:${ink3};text-transform:uppercase;letter-spacing:0.08em;margin-bottom:3px;}
+.ddt-temp{color:${accent};font-weight:600;}
+.ice-line{color:${isPro?'#7ab8ff':'#5b9bd5'};border-top:1px dashed ${border};margin-top:6px;padding-top:6px;font-size:0.8rem;}
+.batch-total{font-family:${isPro?monoFont:handFont};font-size:${isPro?'0.82rem':'1rem'};color:${ink2};text-align:right;padding-top:8px;border-top:1.5px solid ${border};margin-top:6px;}
+.batch-total strong{color:${accent};}
+.tl-item{display:flex;gap:10px;margin-bottom:13px;align-items:flex-start;}
+.tl-dot{width:20px;height:20px;border-radius:${isPro?'2px':'50%'};border:1.5px solid ${border};display:flex;align-items:center;justify-content:center;font-size:0.68rem;flex-shrink:0;background:${cardBg};}
+.tl-item.bake .tl-dot{background:${accent};border-color:${accent};}
+.tl-time{font-family:${monoFont};font-size:0.85rem;color:${accent};display:block;margin-bottom:1px;}
+.tl-label{font-size:${isPro?'0.82rem':'0.9rem'};font-style:${isPro?'normal':'italic'};font-weight:500;font-family:${isPro?monoFont:bodyFont};}
+.tl-note{font-family:${isPro?monoFont:handFont};font-size:${isPro?'0.7rem':'0.82rem'};color:${ink3};margin-top:2px;display:block;line-height:1.4;}
+.tl-note.highlight{background:${isPro?'rgba(52,201,138,0.08)':'rgba(45,125,114,0.08)'};border-left:2px solid ${isPro?'#34c98a':'#2d7d72'};color:${isPro?'#34c98a':'#2d7d72'};padding:4px 7px;border-radius:0 ${isPro?'2px':'5px'} ${isPro?'2px':'5px'} 0;margin-top:4px;}
+.tl-note.bloom-note{background:rgba(184,92,92,0.08);border-left:2px solid ${isPro?'#ff5c5c':'#b85c5c'};color:${isPro?'#ff5c5c':'#b85c5c'};padding:4px 7px;border-radius:0 ${isPro?'2px':'5px'} ${isPro?'2px':'5px'} 0;margin-top:4px;}
+.tl-note.preheat-note{background:rgba(74,158,255,0.08);border-left:2px solid ${accent};color:${isPro?accent:'#7a4510'};padding:4px 7px;border-radius:0 ${isPro?'2px':'5px'} ${isPro?'2px':'5px'} 0;margin-top:4px;}
+.wisdom{font-family:${isPro?monoFont:handFont};font-size:${isPro?'0.7rem':'0.92rem'};color:${ink3};padding:10px 12px;background:${cardBg};border-left:${isPro?'2px solid '+border:'3px solid #e8c99a'};border-radius:0 ${isPro?'2px':'8px'} ${isPro?'2px':'8px'} 0;margin-top:14px;line-height:1.5;}
+.footer{font-family:${monoFont};font-size:0.62rem;color:${ink3};text-align:center;margin-top:22px;padding-top:12px;border-top:1px dashed ${border};}
+@media print{body{padding:20px;}@page{margin:1.5cm;}}
+</style></head><body>
+<div class="ey">${isPro?'OMAR PITA MASTER · PRODUCTION RECIPE CARD':'✦ recipe card'}</div>
+<h1>Omar <span>Pita</span></h1>
+<div class="meta">baking · ${tFmt} · v34.0 PWA · science-verified</div>
+<div class="params">
+<span class="param">${count} pitas</span><span class="param">${size} each</span>
+<span class="param">hydration ${hyd}</span><span class="param">bulk ${bulk}</span>
+<span class="param">retard ${fTime}</span><span class="param">room ${rT}</span>
+<span class="param">fridge ${fT}</span><span class="param">mode: ${mode}</span>
+<span class="param">${flour} flour</span><span class="param">${oLabel}</span><span class="param">${mLabel}</span>
+</div>
+<div class="cols">
+<div><div class="sec">${isPro?'INGREDIENTS':'ingredients'}</div>${rHTML}
+<div class="ddt-box">${dHTML}</div>
+<div class="batch-total">${mHTML}</div></div>
+<div><div class="sec">${isPro?'PRODUCTION SCHEDULE':'timeline'}</div>
+<ul style="list-style:none;padding:0;">${sHTML}</ul></div>
+</div>
+<div class="wisdom">${wHTML}</div>
+<div class="footer">Omar Pita Master v34.0 · ${isPro?'production':'artisan'} · printed ${new Date().toLocaleString()}</div>
+<script>window.onload=()=>{window.print();}<\/script>
+</body></html>`);
+  win.document.close();
+}
+</script>
+</body>
+</html>
