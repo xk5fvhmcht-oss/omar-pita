@@ -376,7 +376,7 @@ input[type=datetime-local]:focus{border-color:var(--accent);}
   <div class="header-eyebrow" id="headerEyebrow">✦ a bread calculator, with feeling ✦</div>
   <h1>Omar <span>Pita</span></h1>
   <div class="header-sub" id="headerSub">I thought carefully about every gram. You're welcome.</div>
-  <div class="version-badge">v37.0 · PWA · offline-ready · science-verified</div>
+  <div class="version-badge">v38.0 · PWA · offline-ready · science-verified</div>
 </header>
 
 <div style="display:flex;flex-direction:column;gap:18px;">
@@ -625,7 +625,7 @@ function toggleTheme(){
   theme=theme==='artisan'?'pro':'artisan';
   document.documentElement.setAttribute('data-theme',theme);
   document.getElementById('themeLabel').textContent=theme==='pro'?'ARTISAN MODE':'PROFESSIONAL MODE';
-  document.getElementById('themeColor').content=theme==='pro'?'#0f1117':'#fdf8f0';
+  document.getElementById('themeColor').content=theme==='pro'?'#f2ede4':'#fdf8f0';
   updateThemeText();saveState();
 }
 function updateThemeText(){
@@ -644,16 +644,18 @@ const MIXER_CFG={
   hand:  {frictionF:7,  mixMins:[10,15],autoDefault:true, autoLock:null,           minG:0,   maxG:Infinity},
   ka:    {frictionF:23, mixMins:[8,10], autoDefault:true, autoLock:null,           minG:400, maxG:1800},
   spiral:{frictionF:14, mixMins:[4,6],  autoDefault:false,autoLock:'suggest-off',  minG:1000,maxG:5000},
-  fp:    {frictionF:25, mixMins:[1,1],  autoDefault:false,autoLock:'off',          minG:0,   maxG:800},
+  fp:    {frictionF:25, mixMins:[1,1],  autoDefault:false,autoLock:'off',          minG:0,   maxG:700},
+  // FP max 700g: confirmed real-world limit for 9-cup processor (your equipment)
+  // Conservative enough to protect smaller bowls too
 };
 const OVEN_CFG={
-  steel: {preheatMins:60,bakeNote:'2–3 min per batch · flip at 90 sec · look for char spots'},
-  gozney:{preheatMins:40,bakeNote:'60–90 sec total · no flip · watch colour every 15 sec'},
+  steel: {preheatMins:60,bakeNote:'2–3 min per batch · flip at 90 sec · look for a full puff and light char spots — that\'s the signal'},
+  gozney:{preheatMins:40,bakeNote:'60–90 sec total · no flip · watch for full puff then light char on dome side — pull immediately'},
 };
-const MIXER_LIMITS={hand:{min:0,max:Infinity},ka:{min:400,max:1800},spiral:{min:1000,max:5000},fp:{min:0,max:800}};
+const MIXER_LIMITS={hand:{min:0,max:Infinity},ka:{min:400,max:1800},spiral:{min:1000,max:5000},fp:{min:0,max:700}};
 function mixerRecommendation(m){
   if(m<400)  return{mixer:'hand',  reason:'hand mix or food processor — batch too small for stand mixers'};
-  if(m<800)  return{mixer:'fp',    reason:'food processor or hand mix — ideal range for both'};
+  if(m<700)  return{mixer:'fp',    reason:'food processor or hand mix — ideal range for both'};
   if(m<1000) return{mixer:'ka',    reason:'KitchenAid — sweet spot for this batch'};
   if(m<=1800)return{mixer:'ka',    reason:'KitchenAid or Ooni Halo Pro — both ideal'};
   if(m<=5000)return{mixer:'spiral',reason:'Ooni Halo Pro — ideal range for spiral'};
@@ -827,7 +829,7 @@ function update(){
     warnEl.textContent='→ above 1.8kg exceeds KitchenAid manual limit — consider Ooni Halo Pro';
   }else if(mixer==='fp'&&totalMass>MIXER_LIMITS.fp.max){
     warnEl.className='mixer-warn soft';warnEl.style.display='block';
-    warnEl.textContent='→ above 800g enriched dough crowds the food processor — split or switch to KitchenAid';
+    warnEl.textContent='→ above 700g enriched dough crowds a 9-cup processor — split into two runs or switch to KitchenAid';
   }
 
   // Fermentation activity
@@ -847,25 +849,62 @@ function update(){
   else if(oven==='gozney'){warn.className='warn-box over';warn.textContent=isPro?'Gozney: 700°F+ — pita puffs in 60–90 sec. Monitor sugar browning.':'🔥 Gozney: at 700°F+ pita puffs in 60–90 sec. Sugar browns fast — stay close.';}
   else if(fT>=43){warn.className='warn-box over';warn.textContent=isPro?`fridge at ${fT}°F — slow fermentation active, monitor dough carefully`:'🌡️ at 43°F+ your fridge is fermenting as much as retarding — watch your dough';}
 
-  // Recipe math
+  // ─── RECIPE MATH — ingredients in mixing order ────────────────────────────
   const fb=flourBase(totalMass,hyd);
   let sW=0,fF=fb,fW=fb*hyd;
   let html='';
+
   if(isSour){
+    // Sourdough mixing order: starter → water → flour → salt → oil → milk → sugar → mahlab
     sW=fb*inoc;fF=fb-(sW/2);fW=Math.max(0,(fb*hyd)-(sW/2));
     html+=ingRow('starter',sW);
+    html+=ingRow('water',fW);
+    html+=ingRow('flour',fF);
+    html+=ingRow('salt',fb*0.018);
+    html+=ingRow('oil',fb*0.06);
+    html+=ingRow('milk',fb*0.04);
+    html+=ingRow('sugar',fb*0.02);
+    html+=ingRow('mahlab',fb*0.005,1);
   }else{
+    // Yeasted mixing order: water → flour → (bloom yeast separately) → salt → oil → milk → sugar → mahlab
+    // For autolyse: flour + water first, rest, then remaining
+    // Sugar note: ADY only — reserve a pinch for the bloom
     const refActivity=3.6;
     const yPct=Math.min(0.02,Math.max(0.0005,0.005*(refActivity/activity)))*(yeast==='IDY'?0.75:1);
     const yG=fb*yPct;
     const c=ingCfg['yeast'];
-    html+=`<div class="recipe-item"><span class="ing-name"><span class="ing-emoji">${c.emoji}</span>${yeast==='IDY'?'instant':'active dry'} yeast</span><span class="ing-weight">${Math.max(0.1,yG-0.1).toFixed(1)}–${(yG+0.1).toFixed(1)} g</span></div>`;
+    const yeastLabel=yeast==='IDY'?'instant':'active dry';
+    html+=`<div class="recipe-item"><span class="ing-name"><span class="ing-emoji">${c.emoji}</span>${yeastLabel} yeast</span><span class="ing-weight">${Math.max(0.1,yG-0.1).toFixed(1)}–${(yG+0.1).toFixed(1)} g</span></div>`;
+    html+=ingRow('water',fW);
+    html+=ingRow('flour',fF);
+    html+=ingRow('salt',fb*0.018);
+    html+=ingRow('oil',fb*0.06);
+    html+=ingRow('milk',fb*0.04);
+    // Sugar: show ADY bloom note only when ADY is selected
+    const sugarNote = (yeast==='ADY') ? ' · reserve a pinch for the bloom' : '';
+    html+=`<div class="recipe-item">
+      <span class="ing-name"><span class="ing-emoji">${ingCfg.sugar.emoji}</span>${ingCfg.sugar.label}${sugarNote?`<span style="font-family:var(--num-font);font-size:0.72rem;color:var(--ink3);font-style:normal;margin-left:4px;">${sugarNote}</span>`:''}</span>
+      <span class="ing-weight">${Math.round(fb*0.02)} g</span>
+    </div>`;
+    html+=ingRow('mahlab',fb*0.005,1);
   }
-  html+=ingRow('flour',fF);html+=ingRow('water',fW);html+=ingRow('salt',fb*0.018);
-  html+=ingRow('oil',fb*0.06);html+=ingRow('milk',fb*0.04);html+=ingRow('sugar',fb*0.02);
-  html+=ingRow('mahlab',fb*0.005,1);
   document.getElementById('recipe').innerHTML=html;
+
+  // Method note — one line of technique context, always visible
+  const methodNote = autolyseEffective
+    ? (isSour
+        ? 'combine starter + water first · add flour · rest 30 min · add salt, oil & remaining ingredients · knead'
+        : 'bloom yeast in ~30g warm water with a pinch of sugar · combine flour + remaining water · rest 30 min · add salt first, then oil, milk, sugar, mahlab · knead')
+    : (isSour
+        ? 'combine all ingredients · add salt first · then oil & remaining · knead until smooth'
+        : (needsBloom
+            ? 'bloom yeast in ~30g warm water with a pinch of sugar · combine all ingredients · add salt first, then oil · knead'
+            : 'combine all ingredients · add salt first · then oil & remaining · knead until smooth'));
+
   document.getElementById('massSumm').innerHTML=`<strong>${totalMass} g</strong> total · ${count} × ${size} g`;
+
+  // Method note sits between recipe and DDT box
+  let methodHTML=`<div style="margin-top:12px;padding:8px 12px;background:var(--sub);border-left:3px solid var(--accent-lt);border-radius:0 8px 8px 0;font-family:var(--label-font);font-size:0.88rem;color:var(--ink2);line-height:1.5;">${methodNote}</div>`;
 
   // DDT + Ice
   const frictionF=mcfg.frictionF;
@@ -883,16 +922,21 @@ function update(){
     ddtHTML+=`</div>`;
   }
   if(isSour)ddtHTML+=`<div style="font-size:0.78rem;color:var(--ink3);margin-top:3px;">starter temp assumed = room temp · adjust if using cold starter</div>`;
-  if(ice)ddtHTML+=`<div class="ice-line">🧊 ${ice.waterG} g cold water + ${ice.iceG} g ice${isPro?' (latent heat: 80 cal/g, 0.556 cal/g/°F)':' · if freezer ice <20°F use ~8% less'}</div>`;
+  if(ice)ddtHTML+=`<div class="ice-line">🧊 ${ice.waterG} g cold water + ${ice.iceG} g ice · if freezer ice <20°F use ~8% less</div>`;
   ddtHTML+=`<div style="font-size:0.78rem;color:var(--ink3);margin-top:5px;">mix: ${mr[0]===mr[1]?mr[0]:mr[0]+'–'+mr[1]} min · friction: ${frictionF}°F</div>`;
-  document.getElementById('ddtBox').innerHTML=ddtHTML;
+
+  // Inject method note before DDT box, DDT after
+  document.getElementById('ddtBox').innerHTML=methodHTML+ddtHTML;
 
   // Timeline (chronological sort + past detection)
   const target=new Date(document.getElementById('targetBake').value);
   const tBake=target.getTime();
   const oCfg=OVEN_CFG[oven];
   const tPreheat=new Date(tBake-oCfg.preheatMins*60000);
-  const tRoll=new Date(tBake-20*60000);
+  // Roll window: 2 min per pita + 8 min rest, minimum 20 min
+  // This resolves the discordance between timestamp and instruction
+  const rollMins = Math.max(20, count * 2 + 8);
+  const tRoll=new Date(tBake-rollMins*60000);
   const tBall=new Date(tRoll.getTime()-40*60000);
   const glide=calcGlide(totalMass,count,rT,fT,fH);
   const tPull=new Date(tBall.getTime()-glide*60000);
@@ -905,30 +949,52 @@ function update(){
   const tBloom=new Date(tMix.getTime()-(needsBloom?BLOOM_MINS*60000:0));
 
   const preheatNote=oven==='steel'
-    ?`${isPro?'':'place steel on top rack · '}crank to 550°F · ${oCfg.preheatMins} min minimum — steel must be fully saturated`
-    :`target 700–850°F · let floor stabilise ${oCfg.preheatMins} min before first load`;
+    ?`place steel on top rack · crank to 550°F · ${oCfg.preheatMins} min minimum — steel must be fully saturated`
+    :`target 700–850°F · let floor stabilise ${oCfg.preheatMins} min before first load · flour test: pinch on stone turns golden in 3–4 sec when ready`;
+
+  // Mix note — reflects correct salt-first order
   const mixNote=autolyseEffective
-    ?(isPro?'flour + water only → rest 30 min → add remaining ingredients → knead':'combine flour + water only · rest uncovered 30 min · then add salt, oil, starter/yeast & knead')
-    :`combine all ingredients · knead · ${mr[0]===mr[1]?mr[0]:mr[0]+'–'+mr[1]} min`;
+    ?'combine flour + water only · rest uncovered 30 min · then add salt first · mix · then oil, milk, sugar, mahlab · knead'
+    :`combine flour + water · add salt first · mix · then add oil, milk, sugar, mahlab · knead · ${mr[0]===mr[1]?mr[0]:mr[0]+'–'+mr[1]} min`;
+
+  // Bloom note — includes sugar for ADY
+  const bloomNote=needsBloom
+    ?'dissolve ADY with a pinch of your measured sugar in ~30g warm water at 105–110°F · wait until foamy (5–10 min) · foamy sooner is better — it means active yeast · no foam after 10 min = dead yeast, start fresh'
+    :'';
+
+  // Ball note — tight ball instruction
+  const ballNote='shape each piece into a tight ball · pinch the seam firmly underneath · keep covered with a damp cloth';
+
+  // Fridge note
+  const fridgeNote='airtight container or tightly wrapped — dough will expand · label with your pull time';
+
+  // Pull note — finger press test
+  const pullNote=glide>0
+    ?`temper ${glide} min on counter · dough is ready when it yields softly to a finger press and feels slightly warm — don\'t rush this`
+    :'bring to room temp · press a finger in — it should yield softly, not resist';
+
+  // Roll note — oven-aware with thickness reference
+  const gozneyLargeBatch=oven==='gozney'&&count*2>40;
+  const rollNote=oven==='gozney'
+    ?`roll all ${count} pitas · ~3mm thin (about the thickness of a pound coin) · cover with damp cloth · rest 7–8 min before going outside · dough should feel soft and yielding${gozneyLargeBatch?' · large batch — start rolling before lighting the Gozney':''}`
+    :'roll to ~3mm (pound coin thickness) · cover with damp cloth · rest 7–8 min · the dough will tell you when it\'s ready — it relaxes and stops springing back';
+
+  // Bake note — visual success cues per oven
+  const bakeNote=oven==='steel'
+    ?`pita should puff fully within 90 sec — if it doesn\'t, your steel needs more preheat time · flip once · look for light char spots · ${count} pitas`
+    :`watch for full puff then light char on the dome side — pull immediately · 60–90 sec total · ${count} pitas`;
 
   const events=[];
   events.push({t:tPreheat,emoji:'🌡️',label:'preheat oven',note:preheatNote,nc:'preheat-note',extra:''});
-  if(needsBloom)events.push({t:tBloom,emoji:'🌸',label:'bloom the yeast',note:isPro?'dissolve ADY in ~30g water at 105–110°F · 10 min · confirm foam before proceeding':'dissolve active dry yeast in ~30 g of your measured water · warm to 105–110°F · wait 10 min until foamy · no foam = dead yeast',nc:'bloom-note',extra:''});
+  if(needsBloom)events.push({t:tBloom,emoji:'🌸',label:'bloom the yeast',note:bloomNote,nc:'bloom-note',extra:''});
   events.push({t:tMix,emoji:'🥣',label:'mix',note:mixNote,nc:'highlight',extra:''});
   if(fH>0){
-    events.push({t:tFridge,emoji:'❄️',label:'into the fridge',note:'cover tightly · label with pull time',nc:'',extra:''});
-    events.push({t:tPull,emoji:'⏰',label:'pull from fridge',note:glide>0?`temper ${glide} min on counter`:'bring to room temp before rolling',nc:'',extra:''});
+    events.push({t:tFridge,emoji:'❄️',label:'into the fridge',note:fridgeNote,nc:'',extra:''});
+    events.push({t:tPull,emoji:'⏰',label:'pull from fridge',note:pullNote,nc:'',extra:''});
   }
-  events.push({t:tBall,emoji:'⚖️',label:'portion & ball',note:'±40 g by feel · keep covered',nc:'',extra:''});
-
-  // Roll note — oven-aware
-  const gozneyLargeBatch = oven==='gozney' && count*2 > 40;
-  const rollNote = oven==='gozney'
-    ? `roll all ${count} pitas to ~3mm · cover with damp cloth · rest 7–8 min before going outside · dough should feel soft and yielding, not spring back${gozneyLargeBatch?' · large batch — consider starting to roll before lighting the Gozney':''}`
-    : 'roll to ~3mm · cover with damp cloth · rest 7–8 min · the dough will tell you when it\'s ready';
-
+  events.push({t:tBall,emoji:'⚖️',label:'portion & ball',note:ballNote,nc:'',extra:''});
   events.push({t:tRoll,emoji:'🔵',label:'roll & final proof',note:rollNote,nc:'',extra:''});
-  events.push({t:target,emoji:'🔥',label:'bake',note:`${oCfg.bakeNote} · ${count} pitas`,nc:'',extra:'bake'});
+  events.push({t:target,emoji:'🔥',label:'bake',note:bakeNote,nc:'',extra:'bake'});
   events.sort((a,b)=>a.t.getTime()-b.t.getTime());
 
   const now=Date.now();
@@ -1012,16 +1078,16 @@ function printCard(){
   const oLabel={steel:'Home Steel 550°F',gozney:'Gozney Dome'}[oven];
   const mLabel={hand:'Hand mix',ka:'KitchenAid',spiral:'Ooni Halo Spiral',fp:'Food Processor'}[mixer];
   const isPro=theme==='pro';
-  const bg=isPro?'#0f1117':'#fdf8f0';
-  const cardBg=isPro?'#181c24':'#f7f0e3';
-  const border=isPro?'#262c38':'#efe6d3';
-  const ink=isPro?'#e8eaf0':'#2d2418';
-  const ink2=isPro?'#9aa0b0':'#5c4d38';
-  const ink3=isPro?'#525a70':'#9c8b72';
-  const accent=isPro?'#4a9eff':'#c17b3a';
-  const bodyFont=isPro?'Inter,system-ui,sans-serif':"'Fraunces',Georgia,serif";
+  const bg=isPro?'#f2ede4':'#fdf8f0';
+  const cardBg=isPro?'#ebe4d8':'#f7f0e3';
+  const border=isPro?'#d8cfc0':'#efe6d3';
+  const ink=isPro?'#1e1a14':'#2d2418';
+  const ink2=isPro?'#4a4030':'#5c4d38';
+  const ink3=isPro?'#8a7d68':'#9c8b72';
+  const accent=isPro?'#5c6bc0':'#c17b3a';
+  const bodyFont="'Fraunces',Georgia,serif";
   const monoFont="'DM Mono','Courier New',monospace";
-  const handFont=isPro?'Inter,system-ui,sans-serif':"'Caveat',cursive";
+  const handFont=isPro?"'Fraunces',Georgia,serif":"'Caveat',cursive";
 
   const win=window.open('','_blank');
   win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Omar Pita</title>
@@ -1029,41 +1095,43 @@ function printCard(){
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:${bodyFont};background:${bg};color:${ink};padding:32px;max-width:760px;margin:0 auto;}
-h1{font-size:${isPro?'1.4rem':'2.2rem'};font-style:${isPro?'normal':'italic'};font-weight:${isPro?'600':'700'};letter-spacing:${isPro?'0.02em':'-0.02em'};}
+h1{font-size:${isPro?'1.8rem':'2.2rem'};font-style:${isPro?'normal':'italic'};font-weight:700;letter-spacing:-0.02em;}
 h1 span{color:${accent};}
-.ey{font-family:${isPro?monoFont:handFont};font-size:${isPro?'0.68rem':'1rem'};color:${accent};margin-bottom:6px;${isPro?'text-transform:uppercase;letter-spacing:0.1em;':''}}
+.ey{font-family:${isPro?monoFont:handFont};font-size:0.78rem;color:${accent};margin-bottom:6px;}
 .meta{font-family:${monoFont};font-size:0.7rem;color:${ink3};margin-top:6px;margin-bottom:18px;letter-spacing:0.04em;}
 .params{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px;}
-.param{font-family:${monoFont};font-size:0.68rem;background:${border};color:${ink2};padding:3px 9px;border-radius:${isPro?'2px':'20px'};}
+.param{font-family:${monoFont};font-size:0.72rem;background:${border};color:${ink2};padding:3px 9px;border-radius:20px;}
 .cols{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-bottom:18px;}
-.sec{font-family:${isPro?monoFont:handFont};font-size:${isPro?'0.68rem':'1.1rem'};color:${accent};margin-bottom:8px;border-bottom:1px ${isPro?'solid':'dashed'} ${border};padding-bottom:4px;${isPro?'text-transform:uppercase;letter-spacing:0.1em;':''}}
-.recipe-item{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px ${isPro?'solid':'dashed'} ${border};font-size:0.88rem;color:${ink2};}
+.sec{font-family:${isPro?monoFont:handFont};font-size:${isPro?'0.82rem':'1.1rem'};color:${accent};margin-bottom:8px;border-bottom:1px dashed ${border};padding-bottom:4px;font-style:${isPro?'normal':'normal'};}
+.recipe-item{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed ${border};font-size:0.88rem;color:${ink2};}
 .recipe-item:last-child{border:none;}
-.ing-name{display:flex;align-items:center;gap:6px;font-style:${isPro?'normal':'italic'};}
+.ing-name{display:flex;align-items:center;gap:6px;font-style:${isPro?'normal':'italic'};font-family:${bodyFont};}
 .ing-emoji{${isPro?'display:none;':''}}
+.ing-note{font-size:0.72rem;color:${ink3};font-style:normal;font-family:${monoFont};margin-left:4px;}
 .ing-weight{font-family:${monoFont};font-size:0.82rem;${isPro?'color:'+accent+';':'background:'+border+';padding:2px 7px;border-radius:12px;'}}
-.ddt-box{background:${cardBg};border:1px solid ${border};border-radius:${isPro?'4px':'8px'};padding:10px 12px;margin-top:10px;font-family:${isPro?monoFont:handFont};font-size:0.85rem;color:${ink2};line-height:1.7;}
-.ddt-title{font-family:${monoFont};font-size:0.62rem;color:${ink3};text-transform:uppercase;letter-spacing:0.08em;margin-bottom:3px;}
+.method-note{background:${cardBg};border-left:3px solid ${accent};padding:8px 12px;border-radius:0 6px 6px 0;font-family:${isPro?monoFont:handFont};font-size:0.82rem;color:${ink2};margin-top:12px;line-height:1.5;}
+.ddt-box{background:${cardBg};border:1px solid ${border};border-radius:8px;padding:10px 12px;margin-top:10px;font-family:${isPro?monoFont:handFont};font-size:0.85rem;color:${ink2};line-height:1.7;}
+.ddt-title{font-family:${monoFont};font-size:0.65rem;color:${ink3};text-transform:uppercase;letter-spacing:0.08em;margin-bottom:3px;}
 .ddt-temp{color:${accent};font-weight:600;}
-.ice-line{color:${isPro?'#7ab8ff':'#5b9bd5'};border-top:1px dashed ${border};margin-top:6px;padding-top:6px;font-size:0.8rem;}
-.batch-total{font-family:${isPro?monoFont:handFont};font-size:${isPro?'0.82rem':'1rem'};color:${ink2};text-align:right;padding-top:8px;border-top:1.5px solid ${border};margin-top:6px;}
+.ice-line{color:#5b9bd5;border-top:1px dashed ${border};margin-top:6px;padding-top:6px;font-size:0.8rem;}
+.batch-total{font-family:${isPro?monoFont:handFont};font-size:1rem;color:${ink2};text-align:right;padding-top:8px;border-top:1.5px solid ${border};margin-top:6px;}
 .batch-total strong{color:${accent};}
 .tl-item{display:flex;gap:10px;margin-bottom:13px;align-items:flex-start;}
-.tl-dot{width:20px;height:20px;border-radius:${isPro?'2px':'50%'};border:1.5px solid ${border};display:flex;align-items:center;justify-content:center;font-size:0.68rem;flex-shrink:0;background:${cardBg};}
+.tl-dot{width:20px;height:20px;border-radius:${isPro?'4px':'50%'};border:1.5px solid ${border};display:flex;align-items:center;justify-content:center;font-size:0.68rem;flex-shrink:0;background:${cardBg};}
 .tl-item.bake .tl-dot{background:${accent};border-color:${accent};}
 .tl-time{font-family:${monoFont};font-size:0.85rem;color:${accent};display:block;margin-bottom:1px;}
-.tl-label{font-size:${isPro?'0.82rem':'0.9rem'};font-style:${isPro?'normal':'italic'};font-weight:500;font-family:${isPro?monoFont:bodyFont};}
-.tl-note{font-family:${isPro?monoFont:handFont};font-size:${isPro?'0.7rem':'0.82rem'};color:${ink3};margin-top:2px;display:block;line-height:1.4;}
-.tl-note.highlight{background:${isPro?'rgba(52,201,138,0.08)':'rgba(45,125,114,0.08)'};border-left:2px solid ${isPro?'#34c98a':'#2d7d72'};color:${isPro?'#34c98a':'#2d7d72'};padding:4px 7px;border-radius:0 ${isPro?'2px':'5px'} ${isPro?'2px':'5px'} 0;margin-top:4px;}
-.tl-note.bloom-note{background:rgba(184,92,92,0.08);border-left:2px solid ${isPro?'#ff5c5c':'#b85c5c'};color:${isPro?'#ff5c5c':'#b85c5c'};padding:4px 7px;border-radius:0 ${isPro?'2px':'5px'} ${isPro?'2px':'5px'} 0;margin-top:4px;}
-.tl-note.preheat-note{background:rgba(74,158,255,0.08);border-left:2px solid ${accent};color:${isPro?accent:'#7a4510'};padding:4px 7px;border-radius:0 ${isPro?'2px':'5px'} ${isPro?'2px':'5px'} 0;margin-top:4px;}
-.wisdom{font-family:${isPro?monoFont:handFont};font-size:${isPro?'0.7rem':'0.92rem'};color:${ink3};padding:10px 12px;background:${cardBg};border-left:${isPro?'2px solid '+border:'3px solid #e8c99a'};border-radius:0 ${isPro?'2px':'8px'} ${isPro?'2px':'8px'} 0;margin-top:14px;line-height:1.5;}
+.tl-label{font-size:0.9rem;font-style:${isPro?'normal':'italic'};font-weight:500;font-family:${bodyFont};}
+.tl-note{font-family:${isPro?monoFont:handFont};font-size:0.82rem;color:${ink3};margin-top:2px;display:block;line-height:1.4;}
+.tl-note.highlight{background:rgba(45,125,114,0.08);border-left:2px solid #2d7d72;color:#2d7d72;padding:4px 7px;border-radius:0 5px 5px 0;margin-top:4px;}
+.tl-note.bloom-note{background:rgba(184,92,92,0.08);border-left:2px solid #b85c5c;color:#b85c5c;padding:4px 7px;border-radius:0 5px 5px 0;margin-top:4px;}
+.tl-note.preheat-note{background:rgba(193,123,58,0.08);border-left:2px solid ${accent};color:${isPro?accent:'#7a4510'};padding:4px 7px;border-radius:0 5px 5px 0;margin-top:4px;}
+.wisdom{font-family:${isPro?monoFont:handFont};font-size:0.92rem;color:${ink3};padding:10px 12px;background:${cardBg};border-left:3px solid ${isPro?border:'#e8c99a'};border-radius:0 8px 8px 0;margin-top:14px;line-height:1.5;}
 .footer{font-family:${monoFont};font-size:0.62rem;color:${ink3};text-align:center;margin-top:22px;padding-top:12px;border-top:1px dashed ${border};}
 @media print{body{padding:20px;}@page{margin:1.5cm;}}
 </style></head><body>
-<div class="ey">${isPro?'Omar Pita Master · recipe card':'✦ recipe card'}</div>
+<div class="ey">✦ recipe card</div>
 <h1>Omar <span>Pita</span></h1>
-<div class="meta">baking · ${tFmt} · v37.0 PWA · science-verified</div>
+<div class="meta">baking · ${tFmt} · v38.0 PWA · science-verified</div>
 <div class="params">
 <span class="param">${count} pitas</span><span class="param">${size} each</span>
 <span class="param">hydration ${hyd}</span><span class="param">bulk ${bulk}</span>
@@ -1072,14 +1140,14 @@ h1 span{color:${accent};}
 <span class="param">${flour} flour</span><span class="param">${oLabel}</span><span class="param">${mLabel}</span>
 </div>
 <div class="cols">
-<div><div class="sec">${isPro?'INGREDIENTS':'ingredients'}</div>${rHTML}
+<div><div class="sec">ingredients</div>${rHTML}
 <div class="ddt-box">${dHTML}</div>
 <div class="batch-total">${mHTML}</div></div>
-<div><div class="sec">${isPro?'Bake schedule':'timeline'}</div>
+<div><div class="sec">bake schedule</div>
 <ul style="list-style:none;padding:0;">${sHTML}</ul></div>
 </div>
 <div class="wisdom">${wHTML}</div>
-<div class="footer">Omar Pita Master v37.0 · ${isPro?'precision':'artisan'} · printed ${new Date().toLocaleString()}</div>
+<div class="footer">Omar Pita Master v38.0 · ${isPro?'precision':'artisan'} · printed ${new Date().toLocaleString()}</div>
 <script>window.onload=()=>{window.print();}<\/script>
 </body></html>`);
   win.document.close();
