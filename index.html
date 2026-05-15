@@ -850,8 +850,9 @@ function update(){
   else if(fT>=43){warn.className='warn-box over';warn.textContent=isPro?`fridge at ${fT}°F — slow fermentation active, monitor dough carefully`:'🌡️ at 43°F+ your fridge is fermenting as much as retarding — watch your dough';}
 
   // ─── RECIPE MATH — ingredients in mixing order ────────────────────────────
-  // autolyseEffective: only true when all conditions genuinely met
+  // autolyseEffective and needsBloom hoisted before recipe math and timeline both use them
   const autolyseEffective=isAuto&&mode!=='rapid'&&flour!=='AP'&&MIXER_CFG[mixer].autoLock!=='off';
+  const needsBloom=!isSour&&yeast==='ADY';
   const fb=flourBase(totalMass,hyd);
   let sW=0,fF=fb,fW=fb*hyd;
   let html='';
@@ -943,7 +944,6 @@ function update(){
   const glide=calcGlide(totalMass,count,rT,fT,fH);
   const tPull=new Date(tBall.getTime()-glide*60000);
   const tFridge=new Date(tPull.getTime()-fH*3600000);
-  const needsBloom=!isSour&&yeast==='ADY';
   const tMix=new Date(tFridge.getTime()-bH*3600000-(autolyseEffective?30*60000:0));
   const tBloom=new Date(tMix.getTime()-(needsBloom?BLOOM_MINS*60000:0));
 
