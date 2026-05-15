@@ -376,7 +376,7 @@ input[type=datetime-local]:focus{border-color:var(--accent);}
   <div class="header-eyebrow" id="headerEyebrow">✦ a bread calculator, with feeling ✦</div>
   <h1>Omar <span>Pita</span></h1>
   <div class="header-sub" id="headerSub">I thought carefully about every gram. You're welcome.</div>
-  <div class="version-badge">v36.0 · PWA · offline-ready · science-verified</div>
+  <div class="version-badge">v37.0 · PWA · offline-ready · science-verified</div>
 </header>
 
 <div style="display:flex;flex-direction:column;gap:18px;">
@@ -919,15 +919,22 @@ function update(){
     events.push({t:tFridge,emoji:'❄️',label:'into the fridge',note:'cover tightly · label with pull time',nc:'',extra:''});
     events.push({t:tPull,emoji:'⏰',label:'pull from fridge',note:glide>0?`temper ${glide} min on counter`:'bring to room temp before rolling',nc:'',extra:''});
   }
-  events.push({t:tBall,emoji:'⚖️',label:'portion & ball',note:'±40 g tolerance · keep covered',nc:'',extra:''});
-  events.push({t:tRoll,emoji:'🔵',label:'roll & final proof',note:'3mm · flat · cover with damp cloth',nc:'',extra:''});
+  events.push({t:tBall,emoji:'⚖️',label:'portion & ball',note:'±40 g by feel · keep covered',nc:'',extra:''});
+
+  // Roll note — oven-aware
+  const gozneyLargeBatch = oven==='gozney' && count*2 > 40;
+  const rollNote = oven==='gozney'
+    ? `roll all ${count} pitas to ~3mm · cover with damp cloth · rest 7–8 min before going outside · dough should feel soft and yielding, not spring back${gozneyLargeBatch?' · large batch — consider starting to roll before lighting the Gozney':''}`
+    : 'roll to ~3mm · cover with damp cloth · rest 7–8 min · the dough will tell you when it\'s ready';
+
+  events.push({t:tRoll,emoji:'🔵',label:'roll & final proof',note:rollNote,nc:'',extra:''});
   events.push({t:target,emoji:'🔥',label:'bake',note:`${oCfg.bakeNote} · ${count} pitas`,nc:'',extra:'bake'});
   events.sort((a,b)=>a.t.getTime()-b.t.getTime());
 
   const now=Date.now();
   const hasPastSteps=events.some(ev=>ev.t.getTime()<now);
   const pastWarning=hasPastSteps
-    ?`<div style="font-family:var(--num-font);font-size:0.75rem;background:var(--rose-f);color:var(--rose);border:1px solid rgba(255,92,92,0.25);border-radius:var(--btn-radius);padding:8px 12px;margin-bottom:14px;">${isPro?'⚠ ONE OR MORE STEPS ARE IN THE PAST — advance your bake time':'⚠ some steps have already passed — move your bake time forward'}</div>`
+    ?`<div style="font-family:var(--num-font);font-size:0.78rem;background:var(--rose-f);color:var(--rose);border:1px solid rgba(255,92,92,0.25);border-radius:var(--btn-radius);padding:8px 12px;margin-bottom:14px;">⚠ some steps have already passed — move your bake time forward</div>`
     :'';
 
   document.getElementById('schedule').innerHTML=pastWarning+events.map(ev=>{
@@ -970,7 +977,9 @@ function update(){
     mixer==='spiral'?'The Ooni Halo is efficient. Stop when the dough is smooth — over-mixing tightens it.':'',
     mixer==='fp'?'Food processor: fast, hot, precise. The moment it comes together, stop.':'',
     oven==='gozney'?'In the Gozney the pita will puff dramatically and fast. Stay close. Every second matters.':'',
+    oven==='gozney'?'Roll everything before you go outside. The rest after rolling is what makes the pocket — don\'t skip it.':'',
     oven==='steel'?'A fully preheated steel is the difference between pita and flatbread. Give it the full hour.':'',
+    oven==='steel'?'Roll a few, rest them, load the oven. Roll the next batch while the first bakes. Find your rhythm.':'',
     ice?'The ice calculation is exact physics. Use a scale, not guesswork.':'',
   ].filter(Boolean);
   const wisdoms=isPro?techNotes:artisanWisdoms;
@@ -1054,7 +1063,7 @@ h1 span{color:${accent};}
 </style></head><body>
 <div class="ey">${isPro?'Omar Pita Master · recipe card':'✦ recipe card'}</div>
 <h1>Omar <span>Pita</span></h1>
-<div class="meta">baking · ${tFmt} · v36.0 PWA · science-verified</div>
+<div class="meta">baking · ${tFmt} · v37.0 PWA · science-verified</div>
 <div class="params">
 <span class="param">${count} pitas</span><span class="param">${size} each</span>
 <span class="param">hydration ${hyd}</span><span class="param">bulk ${bulk}</span>
@@ -1070,7 +1079,7 @@ h1 span{color:${accent};}
 <ul style="list-style:none;padding:0;">${sHTML}</ul></div>
 </div>
 <div class="wisdom">${wHTML}</div>
-<div class="footer">Omar Pita Master v36.0 · ${isPro?'precision':'artisan'} · printed ${new Date().toLocaleString()}</div>
+<div class="footer">Omar Pita Master v37.0 · ${isPro?'precision':'artisan'} · printed ${new Date().toLocaleString()}</div>
 <script>window.onload=()=>{window.print();}<\/script>
 </body></html>`);
   win.document.close();
