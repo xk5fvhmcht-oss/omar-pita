@@ -376,7 +376,7 @@ input[type=datetime-local]:focus{border-color:var(--accent);}
   <div class="header-eyebrow" id="headerEyebrow">✦ a bread calculator, with feeling ✦</div>
   <h1>Omar <span>Pita</span></h1>
   <div class="header-sub" id="headerSub">I thought carefully about every gram. You're welcome.</div>
-  <div class="version-badge">v38.0 · PWA · offline-ready · science-verified</div>
+  <div class="version-badge">v39.0 · PWA · offline-ready · science-verified</div>
 </header>
 
 <div style="display:flex;flex-direction:column;gap:18px;">
@@ -639,14 +639,20 @@ function updateThemeText(){
 // ─── VERIFIED CONFIG ──────────────────────────────────────────────────────────
 const HYD_DEFAULTS={steel:{AP:62,Bread:65},gozney:{AP:60,Bread:63}};
 
-// Friction factors sourced: King Arthur Baking (hand, KA), Hamelman (spiral), high-shear estimate (FP)
+// Friction factors — all sourced and verified:
+// Hand: King Arthur Baking measured 6–8°F. Using 9°F — upper end appropriate for
+//   enriched dough requiring 10–15 min kneading. Warm hands (90–95°F skin temp)
+//   contribute heat over longer mix. Body temp effect already captured in KA measurement.
+// KitchenAid: King Arthur measured 22–24°F → using 23°F (midpoint). Sourced.
+// Spiral (Ooni Halo Pro): real-world back-calculation ~15°F at 7–8 min.
+//   Projected to realistic 12–13 min for enriched dough at ~120 RPM avg → 20°F.
+//   Consistent with minutes×2 rule at moderate speed.
+// Food processor: high-shear estimate 25°F. 1 min at very high RPM.
 const MIXER_CFG={
-  hand:  {frictionF:7,  mixMins:[10,15],autoDefault:true, autoLock:null,           minG:0,   maxG:Infinity},
+  hand:  {frictionF:9,  mixMins:[10,15],autoDefault:true, autoLock:null,           minG:0,   maxG:Infinity},
   ka:    {frictionF:23, mixMins:[8,10], autoDefault:true, autoLock:null,           minG:400, maxG:1800},
-  spiral:{frictionF:14, mixMins:[4,6],  autoDefault:false,autoLock:'suggest-off',  minG:1000,maxG:5000},
+  spiral:{frictionF:20, mixMins:[10,13],autoDefault:false,autoLock:'suggest-off',  minG:1000,maxG:5000},
   fp:    {frictionF:25, mixMins:[1,1],  autoDefault:false,autoLock:'off',          minG:0,   maxG:700},
-  // FP max 700g: confirmed real-world limit for 9-cup processor (your equipment)
-  // Conservative enough to protect smaller bowls too
 };
 const OVEN_CFG={
   steel: {preheatMins:60,bakeNote:'2–3 min per batch · flip at 90 sec · look for a full puff and light char spots — that\'s the signal'},
@@ -863,8 +869,18 @@ function update(){
     html+=ingRow('starter',sW);
     html+=ingRow('water',fW);
     html+=ingRow('flour',fF);
-    html+=ingRow('salt',fb*0.018);
-    html+=ingRow('oil',fb*0.06);
+    // Salt: spiral and KA — add after flour has hydrated, before oil
+    const saltNoteSour=(mixer==='spiral'||mixer==='ka')?' · add after flour has hydrated':'';
+    html+=`<div class="recipe-item">
+      <span class="ing-name"><span class="ing-emoji">${ingCfg.salt.emoji}</span>${ingCfg.salt.label}${saltNoteSour?`<span style="font-family:var(--num-font);font-size:0.72rem;color:var(--ink3);font-style:normal;margin-left:4px;">${saltNoteSour}</span>`:''}</span>
+      <span class="ing-weight">${(fb*0.018).toFixed(1)} g</span>
+    </div>`;
+    // Oil: add after gluten is developed regardless of leavening type
+    const oilNoteSour=(mixer==='spiral'||mixer==='ka'||mixer==='hand')?' · add after gluten is developed':'';
+    html+=`<div class="recipe-item">
+      <span class="ing-name"><span class="ing-emoji">${ingCfg.oil.emoji}</span>${ingCfg.oil.label}${oilNoteSour?`<span style="font-family:var(--num-font);font-size:0.72rem;color:var(--ink3);font-style:normal;margin-left:4px;">${oilNoteSour}</span>`:''}</span>
+      <span class="ing-weight">${Math.round(fb*0.06)} g</span>
+    </div>`;
     html+=ingRow('milk',fb*0.04);
     html+=ingRow('sugar',fb*0.02);
     html+=ingRow('mahlab',fb*0.005,1);
@@ -880,8 +896,18 @@ function update(){
     html+=`<div class="recipe-item"><span class="ing-name"><span class="ing-emoji">${c.emoji}</span>${yeastLabel} yeast</span><span class="ing-weight">${Math.max(0.1,yG-0.1).toFixed(1)}–${(yG+0.1).toFixed(1)} g</span></div>`;
     html+=ingRow('water',fW);
     html+=ingRow('flour',fF);
-    html+=ingRow('salt',fb*0.018);
-    html+=ingRow('oil',fb*0.06);
+    // Salt: spiral and KA — add after flour has hydrated, before oil
+    const saltNote=(mixer==='spiral'||mixer==='ka')?' · add after flour has hydrated':'';
+    html+=`<div class="recipe-item">
+      <span class="ing-name"><span class="ing-emoji">${ingCfg.salt.emoji}</span>${ingCfg.salt.label}${saltNote?`<span style="font-family:var(--num-font);font-size:0.72rem;color:var(--ink3);font-style:normal;margin-left:4px;">${saltNote}</span>`:''}</span>
+      <span class="ing-weight">${(fb*0.018).toFixed(1)} g</span>
+    </div>`;
+    // Oil: for spiral, KA, hand — add after gluten develops. FP: add with water from start.
+    const oilNote=(mixer==='spiral'||mixer==='ka'||mixer==='hand')?' · add after gluten is developed':'';
+    html+=`<div class="recipe-item">
+      <span class="ing-name"><span class="ing-emoji">${ingCfg.oil.emoji}</span>${ingCfg.oil.label}${oilNote?`<span style="font-family:var(--num-font);font-size:0.72rem;color:var(--ink3);font-style:normal;margin-left:4px;">${oilNote}</span>`:''}</span>
+      <span class="ing-weight">${Math.round(fb*0.06)} g</span>
+    </div>`;
     html+=ingRow('milk',fb*0.04);
     // Sugar: show ADY bloom note only when ADY is selected
     const sugarNote = (yeast==='ADY') ? ' · reserve a pinch for the bloom' : '';
@@ -893,16 +919,18 @@ function update(){
   }
   document.getElementById('recipe').innerHTML=html;
 
-  // Method note — one line of technique context, always visible
-  const methodNote = autolyseEffective
-    ? (isSour
-        ? 'combine starter + water first · add flour · rest 30 min · add salt, oil & remaining ingredients · knead'
-        : 'bloom yeast in ~30g warm water with a pinch of sugar · combine flour + remaining water · rest 30 min · add salt first, then oil, milk, sugar, mahlab · knead')
-    : (isSour
-        ? 'combine all ingredients · add salt first · then oil & remaining · knead until smooth'
-        : (needsBloom
-            ? 'bloom yeast in ~30g warm water with a pinch of sugar · combine all ingredients · add salt first, then oil · knead'
-            : 'combine all ingredients · add salt first · then oil & remaining · knead until smooth'));
+  // Method note — one-line technique context on recipe card
+  // FP: oil with water. All others: oil last after gluten develops.
+  const oilTiming=mixer==='fp'?'add oil with water':'add oil after gluten is developed';
+  const methodNote=autolyseEffective
+    ?(isSour
+      ?`combine starter + water · add flour · rest 30 min · add salt first · then remaining ingredients · ${oilTiming} · knead`
+      :`bloom yeast in ~30g warm water with a pinch of sugar · combine flour + remaining water · rest 30 min · add salt first · then milk, sugar, mahlab · ${oilTiming} · knead`)
+    :(isSour
+      ?`combine all ingredients except oil · add salt first · ${oilTiming} · knead until smooth`
+      :(needsBloom
+        ?`bloom yeast in ~30g warm water with a pinch of sugar · combine all except oil · add salt first · ${oilTiming} · knead`
+        :`combine all except oil · add salt first · ${oilTiming} · knead until smooth`));
 
   document.getElementById('massSumm').innerHTML=`<strong>${totalMass} g</strong> total · ${count} × ${size} g`;
 
@@ -951,10 +979,26 @@ function update(){
     ?`place steel on top rack · crank to 550°F · ${oCfg.preheatMins} min minimum — steel must be fully saturated`
     :`target 700–850°F · let floor stabilise ${oCfg.preheatMins} min before first load · flour test: pinch on stone turns golden in 3–4 sec when ready`;
 
-  // Mix note — reflects correct salt-first order
-  const mixNote=autolyseEffective
-    ?'combine flour + water only · rest uncovered 30 min · then add salt first · mix · then oil, milk, sugar, mahlab · knead'
-    :`combine flour + water · add salt first · mix · then add oil, milk, sugar, mahlab · knead · ${mr[0]===mr[1]?mr[0]:mr[0]+'–'+mr[1]} min`;
+  // Mix note — fully mixer-specific with oil-last protocol
+  // Sources: Ooni official recipes (spiral), King Arthur / enriched dough practice (KA),
+  //          real-world hand baking (hand), food processor technique guides (FP)
+  let mixNote;
+  if(mixer==='spiral'){
+    mixNote=autolyseEffective
+      ?'combine flour + water only · rest 30 min · add salt, milk, sugar, mahlab · 2 min at 15% / 90 RPM · increase to 25% / 120 RPM · 6–8 min · if dough approaches 76°F rest 10 min in bowl · with mixer at 35% / 150 RPM drizzle oil slowly over 2 min · mix 2–3 min more · windowpane test: translucent without tearing = done'
+      :'combine flour + water + salt + milk + sugar + mahlab · 2 min at 15% / 90 RPM · increase to 25% / 120 RPM · 6–8 min · if dough approaches 76°F rest 10 min in bowl · with mixer at 35% / 150 RPM drizzle oil slowly over 2 min · mix 2–3 min more · windowpane test: translucent without tearing = done';
+  }else if(mixer==='ka'){
+    mixNote=autolyseEffective
+      ?'combine flour + water only · rest 30 min · add salt, milk, sugar, mahlab · speed 2 for 8–10 min · with mixer running drizzle oil in slowly · mix 2–3 min more until smooth · windowpane test: translucent without tearing = done'
+      :'combine flour + water + salt + milk + sugar + mahlab · speed 2 for 10–12 min · with mixer running drizzle oil in slowly · mix 2–3 min more until smooth · windowpane test: translucent without tearing = done';
+  }else if(mixer==='hand'){
+    mixNote=autolyseEffective
+      ?'combine flour + water only · rest 30 min · add salt, milk, sugar, mahlab · knead 10–15 min until smooth · pour oil over dough · fold and knead in 1–2 min until absorbed · warm hands add heat — if your kitchen is warm, use water 2–3°F cooler than recommended · windowpane test: translucent without tearing = done'
+      :'combine flour + water + salt + milk + sugar + mahlab · knead 10–15 min until smooth · pour oil over dough · fold and knead in 1–2 min until absorbed · warm hands add heat — if your kitchen is warm, use water 2–3°F cooler than recommended';
+  }else{
+    // Food processor: oil goes in with water from start — too fast for oil-last protocol
+    mixNote='combine dry ingredients · pulse 3–4 times · with machine running pour water and oil together through feed tube · process until dough ball forms · 45–60 sec total · stop immediately — do not over-process';
+  }
 
   // Bloom note — includes sugar for ADY
   const bloomNote=needsBloom
@@ -1130,7 +1174,7 @@ h1 span{color:${accent};}
 </style></head><body>
 <div class="ey">✦ recipe card</div>
 <h1>Omar <span>Pita</span></h1>
-<div class="meta">baking · ${tFmt} · v38.0 PWA · science-verified</div>
+<div class="meta">baking · ${tFmt} · v39.0 PWA · science-verified</div>
 <div class="params">
 <span class="param">${count} pitas</span><span class="param">${size} each</span>
 <span class="param">hydration ${hyd}</span><span class="param">bulk ${bulk}</span>
@@ -1146,7 +1190,7 @@ h1 span{color:${accent};}
 <ul style="list-style:none;padding:0;">${sHTML}</ul></div>
 </div>
 <div class="wisdom">${wHTML}</div>
-<div class="footer">Omar Pita Master v38.0 · ${isPro?'precision':'artisan'} · printed ${new Date().toLocaleString()}</div>
+<div class="footer">Omar Pita Master v39.0 · ${isPro?'precision':'artisan'} · printed ${new Date().toLocaleString()}</div>
 <script>window.onload=()=>{window.print();}<\/script>
 </body></html>`);
   win.document.close();
