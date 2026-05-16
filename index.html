@@ -153,6 +153,53 @@ body{
 [data-theme="artisan"] .pro-status{display:none!important;}
 [data-theme="pro"] .pro-status{display:flex;}
 
+/* ─── INFO BOXES ─────────────────────────────────────────────────────────── */
+.info-box{border-radius:var(--btn-radius);padding:10px 14px;font-family:var(--label-font);font-size:0.9rem;line-height:1.5;margin-bottom:10px;border-left:3px solid var(--teal);background:var(--teal-f);color:var(--ink2);transition:background 0.3s,border-color 0.3s;}
+[data-theme="pro"] .info-box{font-family:var(--num-font);font-size:0.78rem;}
+.info-box.warm{border-left-color:var(--accent);background:var(--accent-f);}
+[data-theme="artisan"] .info-box.warm{color:#7a4510;}
+.info-box.hot{border-left-color:var(--rose);background:var(--rose-f);color:var(--rose);}
+
+/* ─── COUNTDOWN ──────────────────────────────────────────────────────────── */
+.tl-countdown{font-family:var(--num-font);font-size:0.72rem;color:var(--teal);margin-left:8px;background:var(--teal-f);padding:1px 7px;border-radius:var(--pill-radius);}
+.tl-countdown.soon{color:var(--rose);background:var(--rose-f);}
+
+/* ─── DOUGH TEMP CHECKPOINT ──────────────────────────────────────────────── */
+.dough-temp-check{margin-top:12px;padding:10px 14px;background:var(--sub);border:var(--card-border);border-radius:var(--btn-radius);}
+.dough-temp-check label{font-family:var(--label-font);font-size:0.88rem;color:var(--ink2);display:block;margin-bottom:6px;}
+[data-theme="pro"] .dough-temp-check label{font-family:var(--num-font);font-size:0.78rem;}
+.dough-temp-check input[type=number]{width:90px;padding:6px 10px;border-radius:var(--btn-radius);border:var(--card-border);background:var(--bg);color:var(--ink);font-family:var(--num-font);font-size:0.88rem;outline:none;transition:border-color 0.2s;}
+.dough-temp-check input[type=number]:focus{border-color:var(--accent);}
+.dough-temp-response{margin-top:8px;font-family:var(--label-font);font-size:0.88rem;line-height:1.5;display:none;padding:6px 10px;border-radius:var(--btn-radius);}
+[data-theme="pro"] .dough-temp-response{font-family:var(--num-font);font-size:0.78rem;}
+.dough-temp-response.good{background:var(--teal-f);color:var(--teal);border-left:2px solid var(--teal);}
+.dough-temp-response.rest{background:var(--accent-f);color:var(--accent);border-left:2px solid var(--accent);}
+[data-theme="artisan"] .dough-temp-response.rest{color:#7a4510;}
+.dough-temp-response.stop{background:var(--rose-f);color:var(--rose);border-left:2px solid var(--rose);}
+
+/* ─── BAKE JOURNAL ───────────────────────────────────────────────────────── */
+.journal-btn{width:100%;padding:10px;border-radius:var(--btn-radius);border:1.5px dashed var(--border);background:transparent;color:var(--ink2);cursor:pointer;font-family:var(--label-font);font-size:1rem;transition:all 0.2s;margin-top:10px;}
+[data-theme="pro"] .journal-btn{font-family:var(--num-font);font-size:0.78rem;}
+.journal-btn:hover{border-color:var(--accent);color:var(--accent);}
+.journal-panel{display:none;margin-top:12px;padding:14px;background:var(--sub);border:var(--card-border);border-radius:var(--btn-radius);}
+.journal-panel.open{display:block;}
+.journal-panel textarea{width:100%;padding:8px 10px;border-radius:var(--btn-radius);border:var(--card-border);background:var(--bg);color:var(--ink);font-family:var(--label-font);font-size:0.88rem;resize:vertical;min-height:80px;outline:none;transition:border-color 0.2s;margin-bottom:8px;}
+[data-theme="pro"] .journal-panel textarea{font-family:var(--num-font);font-size:0.78rem;}
+.journal-panel textarea:focus{border-color:var(--accent);}
+.journal-save-btn{padding:7px 16px;border-radius:var(--btn-radius);background:var(--accent);color:#fff;border:none;font-family:var(--num-font);font-size:0.78rem;cursor:pointer;transition:opacity 0.2s;}
+.journal-save-btn:hover{opacity:0.85;}
+.journal-entries{margin-top:12px;}
+.journal-entry{padding:10px 12px;background:var(--card);border:var(--card-border);border-radius:var(--btn-radius);margin-bottom:8px;transition:all 0.2s;}
+.journal-entry:hover{border-color:var(--accent);}
+.journal-entry-date{font-family:var(--num-font);font-size:0.7rem;color:var(--ink3);margin-bottom:3px;}
+.journal-entry-params{font-family:var(--num-font);font-size:0.7rem;color:var(--ink2);margin-bottom:4px;}
+.journal-entry-notes{font-family:var(--label-font);font-size:0.85rem;color:var(--ink);line-height:1.4;}
+[data-theme="pro"] .journal-entry-notes{font-family:var(--num-font);font-size:0.75rem;}
+.journal-entry-actions{display:flex;gap:6px;margin-top:6px;}
+.journal-action-btn{font-family:var(--num-font);font-size:0.68rem;padding:3px 8px;border-radius:var(--pill-radius);border:var(--card-border);background:transparent;color:var(--ink3);cursor:pointer;transition:all 0.2s;}
+.journal-action-btn:hover{color:var(--accent);border-color:var(--accent);}
+.journal-action-btn.del:hover{color:var(--rose);border-color:var(--rose);}
+
 /* Install banner */
 #installBanner{
   display:none;position:fixed;bottom:0;left:0;right:0;z-index:999;
@@ -376,7 +423,7 @@ input[type=datetime-local]:focus{border-color:var(--accent);}
   <div class="header-eyebrow" id="headerEyebrow">✦ a bread calculator, with feeling ✦</div>
   <h1>Omar <span>Pita</span></h1>
   <div class="header-sub" id="headerSub">I thought carefully about every gram. You're welcome.</div>
-  <div class="version-badge">v40.0 · PWA · offline-ready · science-verified</div>
+  <div class="version-badge">v41.0 · PWA · offline-ready · science-verified</div>
 </header>
 
 <div style="display:flex;flex-direction:column;gap:18px;">
@@ -466,6 +513,7 @@ input[type=datetime-local]:focus{border-color:var(--accent);}
   <div class="card">
     <div class="card-title"><span class="num">4</span> <span id="card4Title">The slow magic</span></div>
     <div class="subsection">
+      <div class="info-box" id="roomTempInfo"></div>
       <div class="slider-wrap">
         <div class="slider-head"><span class="slider-name">room temperature</span><span class="slider-val" id="tempVal">72 °F</span></div>
         <input type="range" id="tempSlider" min="62" max="88" value="72" step="1">
@@ -476,9 +524,10 @@ input[type=datetime-local]:focus{border-color:var(--accent);}
       </div>
     </div>
     <div class="subsection" id="fridgeBox">
+      <div class="info-box" id="fridgeTempInfo"></div>
       <div class="slider-wrap">
         <div class="slider-head"><span class="slider-name">fridge temperature</span><span class="slider-val" id="fTempVal">39 °F</span></div>
-        <input type="range" id="fTempSlider" min="34" max="45" value="39" step="1">
+        <input type="range" id="fTempSlider" min="34" max="41" value="39" step="1">
       </div>
       <div class="slider-wrap" style="margin-bottom:0">
         <div class="slider-head"><span class="slider-name">retard time</span><span class="slider-val" id="fTimeVal">24 h</span></div>
@@ -500,6 +549,11 @@ input[type=datetime-local]:focus{border-color:var(--accent);}
     <div class="card-title">The recipe</div>
     <div id="recipe"></div>
     <div class="ddt-box" id="ddtBox"></div>
+    <div class="dough-temp-check">
+      <label id="doughTempLabel">✦ what did your dough reach after mixing?</label>
+      <input type="number" id="doughTempInput" placeholder="°F" min="60" max="100" step="1" oninput="checkDoughTemp()">
+      <div class="dough-temp-response" id="doughTempResponse"></div>
+    </div>
     <div class="batch-total" id="massSumm"></div>
   </div>
   <div class="card">
@@ -512,6 +566,12 @@ input[type=datetime-local]:focus{border-color:var(--accent);}
     </div>
     <ul class="timeline" id="schedule"></ul>
     <div class="wisdom" id="wisdom"></div>
+    <button class="journal-btn" onclick="toggleJournal()">✦ save this bake to journal</button>
+    <div class="journal-panel" id="journalPanel">
+      <textarea id="journalNotes" placeholder="notes — what worked, what didn't, how it tasted..."></textarea>
+      <button class="journal-save-btn" onclick="saveBake()">save bake</button>
+      <div class="journal-entries" id="journalEntries"></div>
+    </div>
   </div>
 </div>
 
@@ -791,11 +851,23 @@ function update(){
   const inoc =+document.getElementById('inocSlider').value/100;
   const totalMass=count*size;
 
+  function fmtHours(h){
+    const hrs=Math.floor(h);
+    const mins=Math.round((h-hrs)*60);
+    if(hrs===0)return mins+'min';
+    if(mins===0)return hrs+'h';
+    return hrs+'h '+mins+'min';
+  }
+  // For info box suggestions — round to nearest 15 min, feels human
+  function fmtApprox(h){
+    const rounded=Math.round(h*4)/4; // nearest 0.25h = 15min
+    return fmtHours(rounded);
+  }
   setVal('countVal',count);
   setVal('sizeVal',size+' g');
   setVal('hydVal',(+document.getElementById('hydSlider').value).toFixed(1)+'%');
-  setVal('bulkVal',bH+' h');
-  setVal('fTimeVal',fH+' h');
+  setVal('bulkVal',fmtHours(bH));
+  setVal('fTimeVal',fH===0?'none':fmtHours(fH));
   setVal('tempVal',fmtTemp(rT));
   setVal('fTempVal',fmtTemp(fT));
   setVal('inocVal',Math.round(inoc*100)+'%');
@@ -1050,18 +1122,84 @@ function update(){
   events.push({t:target,emoji:'🔥',label:'bake',note:bakeNote,nc:'',extra:'bake'});
   events.sort((a,b)=>a.t.getTime()-b.t.getTime());
 
+  // ─── INFO BOXES ────────────────────────────────────────────────────────────
+  // Room temperature info box — driven by Q10 model + current bulk time
+  function roomTempText(rT, bH, activity){
+    const q10=Math.pow(2,(rT-77)/18);
+    if(rT<=65)return{text:`cold kitchen — dough will move slowly. Fermentation at ${(q10*100).toFixed(0)}% of reference speed. Consider extending bulk to around ${fmtApprox(bH*1.3)} or moving dough to a warmer spot.`,cls:''};
+    if(rT<=69)return{text:`cool kitchen — slightly slower than ideal. Bulk may need 15–30 min extra. Watch the dough rather than the clock.`,cls:''};
+    if(rT<=73)return{text:`ideal conditions — fermentation running at expected pace. Bulk time is well calibrated for this temperature.`,cls:''};
+    if(rT<=77)return{text:`warm kitchen — fermentation slightly faster than standard. Check dough around ${fmtApprox(bH*0.85)} — it may be ready early.`,cls:'warm'};
+    if(rT<=82)return{text:`hot kitchen — fermentation running ${(q10*100).toFixed(0)}% of reference speed. Consider reducing bulk to around ${fmtApprox(bH*0.7)} and monitoring closely.`,cls:'warm'};
+    return{text:`very hot kitchen — short bulk, watch constantly. Consider around ${fmtApprox(bH*0.5)} bulk maximum, then straight to cold retard or oven.`,cls:'hot'};
+  }
+  const rtInfo=roomTempText(rT,bH,activity);
+  const rtBox=document.getElementById('roomTempInfo');
+  if(rtBox){rtBox.textContent=rtInfo.text;rtBox.className='info-box'+(rtInfo.cls?' '+rtInfo.cls:'');}
+
+  // Fridge temperature info box — different text for sourdough vs yeasted
+  function fridgeTempText(fT,isSour){
+    const supp=fridgeSuppression(fT);
+    if(fT<=34){
+      return isSour
+        ?{text:`34°F — yeast near dormant (suppression ${supp.toFixed(2)}). LAB still producing small amounts of acetic acid. Very slow flavour development. Safe for 48–72h holds.`,cls:''}
+        :{text:`34°F — yeast near dormant (suppression ${supp.toFixed(2)}). Safe holding temperature for extended periods. Fermentation essentially halted.`,cls:''};
+    }
+    if(fT<=36){
+      return isSour
+        ?{text:`${fT}°F — yeast very slow. LAB producing acetic acid — builds pronounced tang over time. Good for 36–72h retards.`,cls:''}
+        :{text:`${fT}°F — yeast very slow (suppression ${supp.toFixed(2)}). Minimal fermentation over many hours. Good for long holds.`,cls:''};
+    }
+    if(fT<=38){
+      return isSour
+        ?{text:`${fT}°F — yeast slow, LAB moderately active. Balanced flavour development — less aggressive tang than colder temps. Good for 24–48h.`,cls:''}
+        :{text:`${fT}°F — yeast slow (suppression ${supp.toFixed(2)}). Noticeable fermentation accumulates over 24h+. Standard cold retard range.`,cls:''};
+    }
+    if(fT<=39){
+      return isSour
+        ?{text:`39°F — yeast active at low level. LAB producing both acetic and lactic acid. Standard cold retard — good balance of control and flavour over 24–36h.`,cls:''}
+        :{text:`39°F — yeast active (suppression ${supp.toFixed(2)}). Meaningful fermentation over a 24–36h retard. Standard fridge setting — monitor dough on longer retards.`,cls:''};
+    }
+    if(fT<=41){
+      return isSour
+        ?{text:`${fT}°F — upper limit of effective cold retard. Yeast and LAB both active. More lactic than acetic at this temperature — milder tang. Monitor dough at 20h.`,cls:'warm'}
+        :{text:`${fT}°F — upper limit of effective cold retard (suppression ${supp.toFixed(2)}). Fermentation proceeding faster than expected. Check dough at 18–20h, not 24h.`,cls:'warm'};
+    }
+    return{text:`${fT}°F — warm fridge. Both yeast and LAB meaningfully active. Risk of over-fermentation on longer retards. Reduce retard time or check dough earlier than planned.`,cls:'hot'};
+  }
+  const ftInfo=fridgeTempText(fT,isSour);
+  const ftBox=document.getElementById('fridgeTempInfo');
+  if(ftBox){ftBox.textContent=ftInfo.text;ftBox.className='info-box'+(ftInfo.cls?' '+ftInfo.cls:'');}
+
+  // ─── TIMELINE WITH COUNTDOWNS ──────────────────────────────────────────────
   const now=Date.now();
   const hasPastSteps=events.some(ev=>ev.t.getTime()<now);
   const pastWarning=hasPastSteps
     ?`<div style="font-family:var(--num-font);font-size:0.78rem;background:var(--rose-f);color:var(--rose);border:1px solid rgba(255,92,92,0.25);border-radius:var(--btn-radius);padding:8px 12px;margin-bottom:14px;">⚠ some steps have already passed — move your bake time forward</div>`
     :'';
 
+  function countdown(t){
+    const diff=t-now;
+    if(diff<=0)return'';
+    const mins=Math.floor(diff/60000);
+    const hrs=Math.floor(mins/60);
+    const m=mins%60;
+    if(hrs>0)return`in ${hrs}h ${m>0?m+'m':''}`;
+    if(mins>0)return`in ${mins}m`;
+    return'now';
+  }
+
   document.getElementById('schedule').innerHTML=pastWarning+events.map(ev=>{
     const isPast=ev.t.getTime()<now;
+    const cd=countdown(ev.t.getTime());
+    const soon=ev.t.getTime()-now<60*60000; // within 1 hour
     return `<li class="tl-item ${ev.extra}" style="${isPast?'opacity:0.4;':''}">
       <div class="tl-dot" style="${isPast?'border-color:var(--rose);color:var(--rose);':''}">${isPast?'✗':ev.emoji}</div>
       <div>
-        <span class="tl-time" style="${isPast?'color:var(--rose);':''}">${fmt(ev.t)}${isPast?' · PAST':''}</span>
+        <span class="tl-time" style="${isPast?'color:var(--rose);':''}">
+          ${fmt(ev.t)}${isPast?' · PAST':''}
+          ${!isPast&&cd?`<span class="tl-countdown${soon?' soon':''}">${cd}</span>`:''}
+        </span>
         <span class="tl-label" style="${isPast?'text-decoration:line-through;':''}">${ev.label}</span>
         ${ev.note&&!isPast?`<span class="tl-note ${ev.nc}">${ev.note}</span>`:''}
       </div>
@@ -1110,7 +1248,101 @@ loadState();
 updateThemeText();
 if(theme==='pro'){document.getElementById('themeLabel').textContent='ARTISAN MODE';}
 update();
-setInterval(update,10000);
+setInterval(update,60000);// 60s — countdown accuracy
+
+// ─── DOUGH TEMPERATURE CHECKPOINT ────────────────────────────────────────────
+function checkDoughTemp(){
+  const val=parseFloat(document.getElementById('doughTempInput').value);
+  const resp=document.getElementById('doughTempResponse');
+  const isSour=mode==='sour';
+  const target=isSour?76:77;
+  if(!val||isNaN(val)){resp.style.display='none';return;}
+  resp.style.display='block';
+  const diff=val-target;
+  if(diff<=-3){
+    resp.className='dough-temp-response good';
+    resp.textContent=`${val}°F — ${Math.abs(diff)}°F below target. Continue mixing — you have thermal headroom. Check again in 2–3 minutes.`;
+  }else if(diff<=-1){
+    resp.className='dough-temp-response good';
+    resp.textContent=`${val}°F — just below target. Almost there. Another minute or two of mixing should bring it home.`;
+  }else if(diff<=1){
+    resp.className='dough-temp-response good';
+    resp.textContent=`${val}°F — right on target. Stop mixing. Dough is at the ideal temperature for fermentation.`;
+  }else if(diff<=3){
+    resp.className='dough-temp-response rest';
+    resp.textContent=`${val}°F — ${diff}°F above target. Stop mixing now. Rest the dough uncovered for 5–10 min to cool slightly before continuing.`;
+  }else{
+    resp.className='dough-temp-response stop';
+    resp.textContent=`${val}°F — ${diff}°F above target. Stop immediately. Rest dough in the fridge for 10–15 min before any further mixing. Over-warm dough weakens gluten structure.`;
+  }
+}
+
+// ─── BAKE JOURNAL ─────────────────────────────────────────────────────────────
+function toggleJournal(){
+  const panel=document.getElementById('journalPanel');
+  panel.classList.toggle('open');
+  if(panel.classList.contains('open'))renderJournal();
+}
+
+function saveBake(){
+  const notes=document.getElementById('journalNotes').value.trim();
+  const entries=JSON.parse(localStorage.getItem('omarPitaJournal')||'[]');
+  const snap={
+    id:Date.now(),
+    date:new Date().toLocaleString(),
+    mode,flour,yeast,oven,mixer,
+    count:document.getElementById('countSlider').value,
+    size:document.getElementById('sizeSlider').value,
+    hyd:document.getElementById('hydVal').textContent,
+    bulk:document.getElementById('bulkVal').textContent,
+    fTime:document.getElementById('fTimeVal').textContent,
+    rT:document.getElementById('tempVal').textContent,
+    fT:document.getElementById('fTempVal').textContent,
+    inoc:document.getElementById('inocVal').textContent,
+    notes,
+  };
+  entries.unshift(snap);
+  if(entries.length>20)entries.pop();// keep last 20 bakes
+  localStorage.setItem('omarPitaJournal',JSON.stringify(entries));
+  document.getElementById('journalNotes').value='';
+  renderJournal();
+}
+
+function renderJournal(){
+  const entries=JSON.parse(localStorage.getItem('omarPitaJournal')||'[]');
+  const container=document.getElementById('journalEntries');
+  if(!entries.length){container.innerHTML=`<div style="font-family:var(--num-font);font-size:0.78rem;color:var(--ink3);text-align:center;padding:12px;">no saved bakes yet</div>`;return;}
+  container.innerHTML=entries.map(e=>`
+    <div class="journal-entry">
+      <div class="journal-entry-date">${e.date}</div>
+      <div class="journal-entry-params">${e.count}×${e.size}g · ${e.hyd} · ${e.mode} · ${e.bulk} bulk · ${e.fTime} retard · ${e.rT} room · ${e.fT} fridge</div>
+      ${e.notes?`<div class="journal-entry-notes">${e.notes}</div>`:''}
+      <div class="journal-entry-actions">
+        <button class="journal-action-btn" onclick="loadBake(${e.id})">reload settings</button>
+        <button class="journal-action-btn del" onclick="deleteBake(${e.id})">delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function loadBake(id){
+  const entries=JSON.parse(localStorage.getItem('omarPitaJournal')||'[]');
+  const e=entries.find(x=>x.id===id);
+  if(!e)return;
+  mode=e.mode;flour=e.flour;yeast=e.yeast||'ADY';oven=e.oven;mixer=e.mixer;
+  document.getElementById('countSlider').value=e.count;
+  document.getElementById('sizeSlider').value=e.size;
+  document.getElementById('bulkSlider').value=parseFloat(e.bulk);
+  document.getElementById('fTimeSlider').value=parseFloat(e.fTime);
+  if(e.inoc)document.getElementById('inocSlider').value=parseFloat(e.inoc);
+  update();saveState();
+}
+
+function deleteBake(id){
+  const entries=JSON.parse(localStorage.getItem('omarPitaJournal')||'[]');
+  localStorage.setItem('omarPitaJournal',JSON.stringify(entries.filter(x=>x.id!==id)));
+  renderJournal();
+}
 
 // ─── PRINT CARD ───────────────────────────────────────────────────────────────
 // Uses in-page print — no window.open() which breaks iOS standalone PWA mode
@@ -1224,7 +1456,7 @@ function printCard(){
     <button class="close-btn" onclick="closePrint()" title="close">✕</button>
     <div class="ey">✦ recipe card</div>
     <h1>Omar <span>Pita</span></h1>
-    <div class="meta">baking · ${tFmt} · v40.0 PWA · science-verified</div>
+    <div class="meta">baking · ${tFmt} · v41.0 PWA · science-verified</div>
     <div class="params">
       <span class="param">${count} pitas</span><span class="param">${size} each</span>
       <span class="param">hydration ${hyd}</span><span class="param">bulk ${bulk}</span>
@@ -1244,7 +1476,7 @@ function printCard(){
       </div>
     </div>
     <div class="wisdom">${wHTML}</div>
-    <div class="footer">Omar Pita Master v40.0 · ${isPro?'precision':'artisan'} · printed ${new Date().toLocaleString()}</div>
+    <div class="footer">Omar Pita Master v41.0 · ${isPro?'precision':'artisan'} · printed ${new Date().toLocaleString()}</div>
   `;
   document.body.appendChild(div);
   div.style.display='block';
