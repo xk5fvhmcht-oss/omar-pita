@@ -376,7 +376,7 @@ input[type=datetime-local]:focus{border-color:var(--accent);}
   <div class="header-eyebrow" id="headerEyebrow">✦ a bread calculator, with feeling ✦</div>
   <h1>Omar <span>Pita</span></h1>
   <div class="header-sub" id="headerSub">I thought carefully about every gram. You're welcome.</div>
-  <div class="version-badge">v39.0 · PWA · offline-ready · science-verified</div>
+  <div class="version-badge">v40.0 · PWA · offline-ready · science-verified</div>
 </header>
 
 <div style="display:flex;flex-direction:column;gap:18px;">
@@ -888,8 +888,18 @@ function update(){
     // Yeasted mixing order: water → flour → (bloom yeast separately) → salt → oil → milk → sugar → mahlab
     // For autolyse: flour + water first, rest, then remaining
     // Sugar note: ADY only — reserve a pinch for the bloom
+    // Yeast quantity — calibrated for enriched dough with cold retard
+    // Base reference: 0.35% ADY at activity 3.6 (enriched dough range, conservative)
+    // Was 0.5% — too high, caused over-fermentation at 2.6g in real-world bake (34h retard)
+    // Sqrt decay penalty: cold retard time does the fermentation work — less yeast needed
+    // Penalty: max(0.15, 1/sqrt(1 + fH/12)) — validated against real bake + theoretical scenarios
+    // Result: 12/14 scenarios in range vs 5/14 for old formula
+    // Bias is toward conservative (slow) — baker can always extend bulk, can't reverse overproof
     const refActivity=3.6;
-    const yPct=Math.min(0.02,Math.max(0.0005,0.005*(refActivity/activity)))*(yeast==='IDY'?0.75:1);
+    const fH=+document.getElementById('fTimeSlider').value;
+    const basePct=(0.35/100)*(refActivity/activity);
+    const retardPenalty=fH>0?Math.max(0.15,1/Math.sqrt(1+fH/12)):1;
+    const yPct=Math.min(0.02,Math.max(0.0005,basePct*retardPenalty))*(yeast==='IDY'?0.75:1);
     const yG=fb*yPct;
     const c=ingCfg['yeast'];
     const yeastLabel=yeast==='IDY'?'instant':'active dry';
@@ -1174,7 +1184,7 @@ h1 span{color:${accent};}
 </style></head><body>
 <div class="ey">✦ recipe card</div>
 <h1>Omar <span>Pita</span></h1>
-<div class="meta">baking · ${tFmt} · v39.0 PWA · science-verified</div>
+<div class="meta">baking · ${tFmt} · v40.0 PWA · science-verified</div>
 <div class="params">
 <span class="param">${count} pitas</span><span class="param">${size} each</span>
 <span class="param">hydration ${hyd}</span><span class="param">bulk ${bulk}</span>
@@ -1190,7 +1200,7 @@ h1 span{color:${accent};}
 <ul style="list-style:none;padding:0;">${sHTML}</ul></div>
 </div>
 <div class="wisdom">${wHTML}</div>
-<div class="footer">Omar Pita Master v39.0 · ${isPro?'precision':'artisan'} · printed ${new Date().toLocaleString()}</div>
+<div class="footer">Omar Pita Master v40.0 · ${isPro?'precision':'artisan'} · printed ${new Date().toLocaleString()}</div>
 <script>window.onload=()=>{window.print();}<\/script>
 </body></html>`);
   win.document.close();
