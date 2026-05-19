@@ -332,7 +332,7 @@ input[type=datetime-local]:focus{border-color:var(--accent);}
 [data-theme="artisan"] .warn-box.over{color:#9a5a10;border-color:rgba(193,123,58,0.3);background:rgba(193,123,58,0.10);}
 
 /* Ferment meter */
-.ferment-meter{height:6px;border-radius:3px;background:var(--border);margin:8px 0 4px;position:relative;}
+.ferment-meter{height:6px;border-radius:3px;background:var(--border);margin:8px 0 4px;overflow:hidden;position:relative;}
 .ferment-bar{height:100%;border-radius:3px;transition:width 0.4s ease,background 0.4s ease;}
 .ferment-label{font-family:var(--num-font);font-size:0.78rem;color:var(--ink3);display:flex;justify-content:space-between;}
 
@@ -540,7 +540,8 @@ input[type=datetime-local]:focus{border-color:var(--accent);}
       <div class="ferment-label"><span>fermentation potential</span><span id="actVal">—</span></div>
       <div class="ferment-meter" style="position:relative;">
         <div class="ferment-bar" id="actBar"></div>
-        <div id="underMarker" style="position:absolute;top:0;bottom:0;width:1.5px;background:rgba(0,0,0,0.25);border-radius:1px;"></div>
+        <div id="markerUnder" style="position:absolute;top:0;bottom:0;width:1.5px;background:rgba(0,0,0,0.25);border-radius:1px;"></div>
+        <div id="markerOver" style="position:absolute;top:0;bottom:0;left:72%;width:1.5px;background:rgba(0,0,0,0.25);border-radius:1px;"></div>
       </div>
       <div class="ferment-label"><span style="color:#7ec8e3">under</span><span>ideal zone</span><span style="color:#ff7043">over</span></div>
       <div class="info-box" id="actInfoBox" style="margin-top:8px;font-size:0.85rem;"></div>
@@ -960,7 +961,7 @@ function update(){
   else{const t=(activity-ACTIVITY_UNDER)/(ACTIVITY_OVER-ACTIVITY_UNDER);bar.style.background=`hsl(${Math.round(160-t*120)},60%,55%)`;}
 
   // Threshold marker — UNDER position scales with ACTIVITY_OVER
-  const underMarker=document.getElementById('underMarker');
+  const underMarker=document.getElementById('markerUnder');
   if(underMarker){underMarker.style.left=(ACTIVITY_UNDER/ACTIVITY_OVER*100).toFixed(1)+'%';}
 
   // Fermentation potential info box — zone messages
