@@ -425,7 +425,7 @@ input[type=datetime-local]:focus{border-color:var(--accent);}
   <div class="header-eyebrow" id="headerEyebrow">✦ a bread calculator, with feeling ✦</div>
   <h1>Omar <span>Pita</span></h1>
   <div class="header-sub" id="headerSub">I thought carefully about every gram. You're welcome.</div>
-  <div class="version-badge">v41.0 · PWA · offline-ready · science-verified</div>
+  <div class="version-badge">v42.0 · PWA · offline-ready · science-verified</div>
 </header>
 
 <div style="display:flex;flex-direction:column;gap:18px;">
@@ -548,7 +548,10 @@ input[type=datetime-local]:focus{border-color:var(--accent);}
 <!-- RIGHT COLUMN -->
 <div class="right-col">
   <div class="card">
-    <div class="card-title">The recipe</div>
+    <div class="card-title" style="justify-content:space-between;">
+      <span>The recipe</span>
+      <button class="pill" id="formulaToggleBtn" onclick="toggleFormula()" style="font-style:normal;font-size:0.72rem;padding:4px 10px;">⚗ new physics</button>
+    </div>
     <div id="recipe"></div>
     <div class="ddt-box" id="ddtBox"></div>
     <div class="dough-temp-check">
@@ -729,11 +732,40 @@ function mixerRecommendation(m){
   if(m<=5000)return{mixer:'spiral',reason:'Ooni Halo Pro — ideal range for spiral'};
   return{mixer:'spiral',reason:'consider splitting — exceeds Halo Pro max (5kg)'};
 }
-const ACTIVITY_UNDER=1.8,ACTIVITY_OVER=9.0,BLOOM_MINS=10;
+const ACTIVITY_UNDER=1.8,BLOOM_MINS=10;
 
-// ─── MATH ENGINE v32.0 ───────────────────────────────────────────────────────
+// ─── DUAL FORMULA SYSTEM ─────────────────────────────────────────────────────
+// Toggle between new physics (default) and v40 classic (fallback/comparison)
+// New physics: suppF=0.518 constant (Q10 handles temperature), K=0.493
+//   Validated: 1h RT = 6.9h fridge (literature: 6-8h) ✓
+//   Anchor: 1.0g ADY for 10×110g, 4h/75°F + 34h/39°F ✓
+// v40 classic: suppF linear (double-counts temperature), K=0.35
+//   Empirically worked but physically wrong — kept as reference
+let useNewPhysics=true; // default: new physics
+
+const FORMULA_CONFIG={
+  new:{
+    suppF:     ()=>0.518,                           // constant — Q10 handles temperature
+    K:         0.493,                               // recalibrated for new suppF
+    OVER:      13.0,                                // raised — 48h retard no longer fires false warning
+    label:     '⚗ new physics',
+    sublabel:  'suppF=0.518 · K=0.493 · OVER=13.0',
+  },
+  classic:{
+    suppF:     (fT)=>0.08+(fT-34)*(0.16/16),       // linear — double-counts temperature
+    K:         0.35,                                // original empirical value
+    OVER:      9.0,                                 // original threshold
+    label:     '⚗ v40 classic',
+    sublabel:  'suppF linear · K=0.35 · OVER=9.0',
+  },
+};
+
+function getConfig(){ return useNewPhysics?FORMULA_CONFIG.new:FORMULA_CONFIG.classic; }
+function getActivityOver(){ return getConfig().OVER; }
+
+// ─── MATH ENGINE ─────────────────────────────────────────────────────────────
 function flourBase(totalMass,hyd){return totalMass/(1+hyd+0.018+0.06+0.04+0.02+0.005);}
-function fridgeSuppression(fT){return 0.08+(fT-34)*(0.16/16);}
+function fridgeSuppression(fT){return getConfig().suppF(fT);}
 function calcActivity(bH,rT,fH,fT,autolyseOn,inocPct,isSour){
   const q10r=Math.pow(2,(rT-77)/18),q10f=Math.pow(2,(fT-77)/18);
   let eb=bH;
@@ -914,6 +946,7 @@ function update(){
 
   // Fermentation activity
   const activity=calcActivity(bH,rT,fH,fT,isAuto,inoc,isSour);
+  const ACTIVITY_OVER=getActivityOver();
   setVal('actVal',activity.toFixed(2));
   const pct=Math.min(100,(activity/ACTIVITY_OVER)*100);
   const bar=document.getElementById('actBar');
@@ -934,6 +967,8 @@ function update(){
   const autolyseEffective=isAuto&&mode!=='rapid'&&flour!=='AP'&&MIXER_CFG[mixer].autoLock!=='off';
   const needsBloom=!isSour&&yeast==='ADY';
   const fb=flourBase(totalMass,hyd);
+  // retardPenalty hoisted for pro status bar access
+  let retardPenalty=fH>0?Math.max(0.15,1/Math.sqrt(1+fH/12)):1;
   let sW=0,fF=fb,fW=fb*hyd;
   let html='';
 
@@ -962,22 +997,27 @@ function update(){
     // Yeasted mixing order: water → flour → (bloom yeast separately) → salt → oil → milk → sugar → mahlab
     // For autolyse: flour + water first, rest, then remaining
     // Sugar note: ADY only — reserve a pinch for the bloom
-    // Yeast quantity — calibrated for enriched dough with cold retard
-    // Base reference: 0.35% ADY at activity 3.6 (enriched dough range, conservative)
-    // Was 0.5% — too high, caused over-fermentation at 2.6g in real-world bake (34h retard)
-    // Sqrt decay penalty: cold retard time does the fermentation work — less yeast needed
-    // Penalty: max(0.15, 1/sqrt(1 + fH/12)) — validated against real bake + theoretical scenarios
-    // Result: 12/14 scenarios in range vs 5/14 for old formula
-    // Bias is toward conservative (slow) — baker can always extend bulk, can't reverse overproof
+    // Yeast quantity — dual formula system
+    // New physics: K=0.493, suppF=0.518 (default)
+    // v40 classic: K=0.35, suppF linear (toggle fallback)
+    // Both use sqrt decay retardPenalty — empirically correct for enriched dough
+    // Bias: conservative — baker waits longer, never blows out
     const refActivity=3.6;
-    const fH=+document.getElementById('fTimeSlider').value;
-    const basePct=(0.35/100)*(refActivity/Math.max(0.01,activity));
-    const retardPenalty=fH>0?Math.max(0.15,1/Math.sqrt(1+fH/12)):1;
-    const yPct=Math.min(0.02,Math.max(0.0005,basePct*retardPenalty))*(yeast==='IDY'?0.75:1);
-    const yG=fb*yPct;
+    const K=getConfig().K;
+    const basePct=(K/100)*(refActivity/Math.max(0.01,activity));
+    // retardPenalty already declared above — use existing value
+    // Calculate in IDY always, then convert to display units
+    const yPctIDY=Math.min(0.02,Math.max(0.0005,basePct*retardPenalty));
+    const yPctDisplay=yeast==='IDY'?yPctIDY:yPctIDY/0.75; // IDY stays, ADY = IDY/0.75
+    const yG=fb*yPctDisplay;
     const c=ingCfg['yeast'];
     const yeastLabel=yeast==='IDY'?'instant':'active dry';
-    html+=`<div class="recipe-item"><span class="ing-name"><span class="ing-emoji">${c.emoji}</span>${yeastLabel} yeast</span><span class="ing-weight">${Math.max(0.1,yG-0.1).toFixed(1)}–${(yG+0.1).toFixed(1)} g</span></div>`;
+    // ADY bloom warning: bloomed ADY is more aggressive — use lower end of range
+    const bloomNote=yeast==='ADY'?' · lower end when blooming · upper end when adding dry':'';
+    html+=`<div class="recipe-item">
+      <span class="ing-name"><span class="ing-emoji">${c.emoji}</span>${yeastLabel} yeast${bloomNote?`<span style="font-family:var(--num-font);font-size:0.72rem;color:var(--ink3);font-style:normal;margin-left:4px;">${bloomNote}</span>`:''}
+      </span><span class="ing-weight">${Math.max(0.1,yG-0.1).toFixed(1)}–${(yG+0.1).toFixed(1)} g</span>
+    </div>`;
     html+=ingRow('water',fW);
     html+=ingRow('flour',fF);
     // Salt: spiral and KA — add after flour has hydrated, before oil
@@ -1210,19 +1250,22 @@ function update(){
 
   // Pro status bar
   if(isPro){
+    const cfg=getConfig();
     document.getElementById('proStatus').innerHTML=
       `<span>activity: ${activity.toFixed(3)}</span><span>Q10 ref: 77°F</span>`+
       `<span>salt −10%</span><span>friction: ${frictionF}°F</span>`+
       `<span>DDT: ${DDT_TARGET}°F</span><span>glide: ${glide} min (k=5.0)</span>`+
-      `<span>fridge suppression: ${fridgeSuppression(fT).toFixed(3)}</span><span>flour base: ${Math.round(fb)}g</span>`;
+      `<span>suppF: ${fridgeSuppression(fT).toFixed(3)} (${useNewPhysics?'new: 0.518':'classic: linear'})</span>`+
+      `<span>K: ${cfg.K} · OVER: ${cfg.OVER}</span>`+
+      `<span>flour base: ${Math.round(fb)}g</span>`;
   }
 
   // Wisdom
   const techNotes=[
-    `activity ${activity.toFixed(2)} · Q10: ${Math.pow(2,(rT-77)/18).toFixed(3)} · fridge suppression: ${fridgeSuppression(fT).toFixed(3)} · salt −10%`,
+    `activity ${activity.toFixed(2)} · Q10: ${Math.pow(2,(rT-77)/18).toFixed(3)} · suppF: ${fridgeSuppression(fT).toFixed(3)} (${useNewPhysics?'new physics':'v40 classic'})`,
     `DDT: (${isSour?76:77}×${isSour?4:3}) − ${isSour?3:2}×${rT} − ${frictionF} = ${Math.round(waterTempF)}°F target water`,
     `glide: τ=${(5.0*Math.pow(Math.max(1,totalMass/Math.max(1,count)),0.4)).toFixed(1)} min · ln(${rT-fT}/10) → ${glide} min`,
-    `yeast: 0.5% at ref 3.6 · capped 2% · IDY 75% of ADY · flour base: ${Math.round(fb)}g`,
+    `yeast: K=${getConfig().K} · retardPenalty=${retardPenalty!==undefined?retardPenalty.toFixed(3):'n/a'} · IDY 75% of ADY · flour base: ${Math.round(fb)}g`,
     `ice: ${ice?ice.iceG+'g ice + '+ice.waterG+'g water':'not needed'} · latent heat 80 cal/g · 0.556 cal/g/°F`,
   ];
   const artisanWisdoms=[
@@ -1245,12 +1288,34 @@ function update(){
   document.getElementById('wisdom').innerHTML=(isPro?'':' ✦ ')+wisdoms[Math.floor(Date.now()/10000)%wisdoms.length];
 }
 
+// ─── FORMULA TOGGLE ───────────────────────────────────────────────────────────
+function toggleFormula(){
+  useNewPhysics=!useNewPhysics;
+  localStorage.setItem('omarPitaFormula', useNewPhysics?'new':'classic');
+  updateFormulaBtn();
+  update();
+}
+function updateFormulaBtn(){
+  const btn=document.getElementById('formulaToggleBtn');
+  if(!btn)return;
+  const cfg=getConfig();
+  btn.textContent=cfg.label;
+  btn.style.background=useNewPhysics?'var(--accent)':'var(--sub)';
+  btn.style.color=useNewPhysics?'#fff':'var(--ink3)';
+  btn.style.border=useNewPhysics?'1px solid var(--accent)':'1px solid var(--border)';
+  btn.title=cfg.sublabel;
+}
+
 // Load saved state, then update
 loadState();
+// Restore formula preference
+const savedFormula=localStorage.getItem('omarPitaFormula');
+if(savedFormula==='classic')useNewPhysics=false;
 updateThemeText();
+updateFormulaBtn();
 if(theme==='pro'){document.getElementById('themeLabel').textContent='ARTISAN MODE';}
 update();
-setInterval(update,60000);// 60s — countdown accuracy
+setInterval(update,60000);
 
 // ─── DOUGH TEMPERATURE CHECKPOINT ────────────────────────────────────────────
 function checkDoughTemp(){
@@ -1458,7 +1523,7 @@ function printCard(){
     <button class="close-btn" onclick="closePrint()" title="close">✕</button>
     <div class="ey">✦ recipe card</div>
     <h1>Omar <span>Pita</span></h1>
-    <div class="meta">baking · ${tFmt} · v41.0 PWA · science-verified</div>
+    <div class="meta">baking · ${tFmt} · v42.0 PWA · science-verified</div>
     <div class="params">
       <span class="param">${count} pitas</span><span class="param">${size} each</span>
       <span class="param">hydration ${hyd}</span><span class="param">bulk ${bulk}</span>
@@ -1478,7 +1543,7 @@ function printCard(){
       </div>
     </div>
     <div class="wisdom">${wHTML}</div>
-    <div class="footer">Omar Pita Master v41.0 · ${isPro?'precision':'artisan'} · printed ${new Date().toLocaleString()}</div>
+    <div class="footer">Omar Pita Master v42.0 · ${isPro?'precision':'artisan'} · printed ${new Date().toLocaleString()}</div>
   `;
   document.body.appendChild(div);
   div.style.display='block';
