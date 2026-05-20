@@ -425,7 +425,7 @@ input[type=datetime-local]:focus{border-color:var(--accent);}
   <div class="header-eyebrow" id="headerEyebrow">✦ a bread calculator, with feeling ✦</div>
   <h1>Omar <span>Pita</span></h1>
   <div class="header-sub" id="headerSub">I thought carefully about every gram. You're welcome.</div>
-  <div class="version-badge">v43.0 · PWA · offline-ready · science-verified</div>
+  <div class="version-badge">v45.0 · PWA · offline-ready · science-verified</div>
 </header>
 
 <div style="display:flex;flex-direction:column;gap:18px;">
@@ -1029,17 +1029,49 @@ function update(){
     // Yeasted mixing order: water → flour → (bloom yeast separately) → salt → oil → milk → sugar → mahlab
     // For autolyse: flour + water first, rest, then remaining
     // Sugar note: ADY only — reserve a pinch for the bloom
-    // Yeast quantity — dual formula system
+    // Yeast calculation — dual formula system
     // New physics: K=0.493, suppF=0.518 (default)
     // v40 classic: K=0.35, suppF linear (toggle fallback)
     // Both use sqrt decay retardPenalty — empirically correct for enriched dough
     // Bias: conservative — baker waits longer, never blows out
+    //
+    // LINEAR RAMP below 4h bulk (no cold retard):
+    // Published Middle Eastern pita recipes (enriched, 2% sugar) cluster at 1.5-1.8% IDY
+    // at 1-2h bulk at 72°F. Anchor: 1.75% IDY at 1h/72°F (average of 7 published recipes).
+    // Temperature-adjusted via Q10: cooler kitchen needs more yeast, warmer needs less.
+    // Same Q10 physics running everywhere else — no inconsistency.
+    // Formula takes over smoothly at 4h — no cliff, no blend zone needed.
+    // Pita always targets full rise so no architectural mode switch required.
+    const RAPID_ANCHOR_H    = 1.0;    // hours — ramp starts here
+    const RAPID_ANCHOR_IDY  = 0.0175; // 1.75% IDY at 1h/72°F — published pita recipe average
+    const RAPID_ANCHOR_TEMP = 72;     // °F — reference temperature for anchor
+    const RAMP_END_H        = 4.0;    // hours — formula takes over here
+
     const refActivity=3.6;
     const K=getConfig().K;
     const basePct=(K/100)*(refActivity/Math.max(0.01,activity));
     // retardPenalty already declared above — use existing value
-    // Calculate in IDY always, then convert to display units
-    const yPctIDY=Math.min(0.02,Math.max(0.0005,basePct*retardPenalty));
+    // Calculate in IDY always, then apply linear ramp for short same-day bakes
+    let yPctIDY=Math.min(0.02,Math.max(0.0005,basePct*retardPenalty));
+
+    // Linear ramp: only for same-day bakes (no cold retard) below 4h
+    // Anchor at 1h is Q10-adjusted for room temperature — same physics as rest of formula
+    if(fH===0 && bH<RAMP_END_H){
+      const formulaAt4h=(K/100)*(refActivity/Math.max(0.01,calcActivity(RAMP_END_H,rT,0,fT,false,0,false)));
+      const formulaAt4h_clamped=Math.min(0.02,Math.max(0.0005,formulaAt4h));
+      // Q10 scale the 1h anchor: cooler kitchen → more yeast, warmer → less
+      // Q10 doubling interval 18°F (standard) — same as rest of formula
+      const q10_adjust=Math.pow(2,(RAPID_ANCHOR_TEMP-rT)/18);
+      const anchor_adjusted=Math.min(0.02,Math.max(0.0005,RAPID_ANCHOR_IDY*q10_adjust));
+      if(bH<=RAPID_ANCHOR_H){
+        yPctIDY=anchor_adjusted;
+      } else {
+        const t=(bH-RAPID_ANCHOR_H)/(RAMP_END_H-RAPID_ANCHOR_H);
+        yPctIDY=anchor_adjusted+t*(formulaAt4h_clamped-anchor_adjusted);
+        yPctIDY=Math.min(0.02,Math.max(0.0005,yPctIDY));
+      }
+    }
+
     const yPctDisplay=yeast==='IDY'?yPctIDY:yPctIDY/0.75; // IDY stays, ADY = IDY/0.75
     const yG=fb*yPctDisplay;
     const c=ingCfg['yeast'];
@@ -1555,7 +1587,7 @@ function printCard(){
     <button class="close-btn" onclick="closePrint()" title="close">✕</button>
     <div class="ey">✦ recipe card</div>
     <h1>Omar <span>Pita</span></h1>
-    <div class="meta">baking · ${tFmt} · v43.0 PWA · science-verified</div>
+    <div class="meta">baking · ${tFmt} · v45.0 PWA · science-verified</div>
     <div class="params">
       <span class="param">${count} pitas</span><span class="param">${size} each</span>
       <span class="param">hydration ${hyd}</span><span class="param">bulk ${bulk}</span>
@@ -1575,7 +1607,7 @@ function printCard(){
       </div>
     </div>
     <div class="wisdom">${wHTML}</div>
-    <div class="footer">Omar Pita Master v43.0 · ${isPro?'precision':'artisan'} · printed ${new Date().toLocaleString()}</div>
+    <div class="footer">Omar Pita Master v45.0 · ${isPro?'precision':'artisan'} · printed ${new Date().toLocaleString()}</div>
   `;
   document.body.appendChild(div);
   div.style.display='block';
