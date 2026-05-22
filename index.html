@@ -425,7 +425,7 @@ input[type=datetime-local]:focus{border-color:var(--accent);}
   <div class="header-eyebrow" id="headerEyebrow">✦ a bread calculator, with feeling ✦</div>
   <h1>Omar <span>Pita</span></h1>
   <div class="header-sub" id="headerSub">I thought carefully about every gram. You're welcome.</div>
-  <div class="version-badge">v45.0 · PWA · offline-ready · science-verified</div>
+  <div class="version-badge">v46.0 · PWA · offline-ready · science-verified</div>
 </header>
 
 <div style="display:flex;flex-direction:column;gap:18px;">
@@ -579,7 +579,10 @@ input[type=datetime-local]:focus{border-color:var(--accent);}
     <button class="journal-btn" onclick="toggleJournal()">✦ save this bake to journal</button>
     <div class="journal-panel" id="journalPanel">
       <textarea id="journalNotes" placeholder="notes — what worked, what didn't, how it tasted..."></textarea>
-      <button class="journal-save-btn" onclick="saveBake()">save bake</button>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <button class="journal-save-btn" onclick="saveBake()">save bake</button>
+        <button class="journal-save-btn" onclick="exportJournal()" style="background:var(--sub);color:var(--ink2);border:var(--card-border);">✦ export all</button>
+      </div>
       <div class="journal-entries" id="journalEntries"></div>
     </div>
   </div>
@@ -1475,6 +1478,52 @@ function deleteBake(id){
   renderJournal();
 }
 
+function exportJournal(){
+  const entries=JSON.parse(localStorage.getItem('omarPitaJournal')||'[]');
+  if(!entries.length){alert('No bakes saved yet.');return;}
+  const lines=['OMAR PITA MASTER — BAKE JOURNAL','exported '+new Date().toLocaleString(),'='.repeat(50),''];
+  entries.forEach((e,i)=>{
+    lines.push('BAKE '+(i+1)+' — '+e.date);
+    lines.push(e.count+'×'+e.size+'g · '+e.hyd+' hydration · '+e.mode+' mode · '+e.yeast);
+    lines.push('bulk: '+e.bulk+' · retard: '+e.fTime+' · room: '+e.rT+' · fridge: '+e.fT);
+    if(e.inoc)lines.push('inoculation: '+e.inoc);
+    if(e.notes)lines.push('notes: '+e.notes);
+    lines.push('');
+  });
+  const text=lines.join('\n');
+  // Try clipboard first, fall back to selectable overlay for iOS PWA
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(()=>{
+      alert('Journal copied to clipboard — paste into Notes or any app to save.');
+    }).catch(()=>showExportOverlay(text));
+  } else {
+    showExportOverlay(text);
+  }
+}
+
+function showExportOverlay(text){
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;padding:20px;';
+  const box=document.createElement('div');
+  box.style.cssText='background:var(--card);border-radius:var(--btn-radius);padding:20px;width:100%;max-width:500px;max-height:80vh;display:flex;flex-direction:column;gap:12px;';
+  const title=document.createElement('div');
+  title.style.cssText='font-family:var(--num-font);font-size:0.85rem;color:var(--ink2);';
+  title.textContent='select all and copy — then paste into Notes to save permanently';
+  const ta=document.createElement('textarea');
+  ta.value=text;
+  ta.style.cssText='width:100%;height:200px;padding:10px;border-radius:var(--btn-radius);border:var(--card-border);background:var(--bg);color:var(--ink);font-family:var(--num-font);font-size:0.72rem;resize:none;outline:none;';
+  ta.readOnly=true;
+  const closeBtn=document.createElement('button');
+  closeBtn.textContent='done';
+  closeBtn.style.cssText='padding:8px 16px;border-radius:var(--btn-radius);background:var(--accent);color:#fff;border:none;font-family:var(--num-font);font-size:0.78rem;cursor:pointer;align-self:flex-end;';
+  closeBtn.onclick=()=>document.body.removeChild(overlay);
+  box.appendChild(title);box.appendChild(ta);box.appendChild(closeBtn);
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+  // Auto-select all text for easy copy
+  setTimeout(()=>{ta.focus();ta.select();},100);
+}
+
 // ─── PRINT CARD ───────────────────────────────────────────────────────────────
 // Uses in-page print — no window.open() which breaks iOS standalone PWA mode
 // (strands user on blank tab with no back button)
@@ -1587,7 +1636,7 @@ function printCard(){
     <button class="close-btn" onclick="closePrint()" title="close">✕</button>
     <div class="ey">✦ recipe card</div>
     <h1>Omar <span>Pita</span></h1>
-    <div class="meta">baking · ${tFmt} · v45.0 PWA · science-verified</div>
+    <div class="meta">baking · ${tFmt} · v46.0 PWA · science-verified</div>
     <div class="params">
       <span class="param">${count} pitas</span><span class="param">${size} each</span>
       <span class="param">hydration ${hyd}</span><span class="param">bulk ${bulk}</span>
@@ -1607,7 +1656,7 @@ function printCard(){
       </div>
     </div>
     <div class="wisdom">${wHTML}</div>
-    <div class="footer">Omar Pita Master v45.0 · ${isPro?'precision':'artisan'} · printed ${new Date().toLocaleString()}</div>
+    <div class="footer">Omar Pita Master v46.0 · ${isPro?'precision':'artisan'} · printed ${new Date().toLocaleString()}</div>
   `;
   document.body.appendChild(div);
   div.style.display='block';
