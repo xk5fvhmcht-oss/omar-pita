@@ -425,7 +425,7 @@ input[type=datetime-local]:focus{border-color:var(--accent);}
   <div class="header-eyebrow" id="headerEyebrow">✦ a bread calculator, with feeling ✦</div>
   <h1>Omar <span>Pita</span></h1>
   <div class="header-sub" id="headerSub">I thought carefully about every gram. You're welcome.</div>
-  <div class="version-badge">v47.0 · PWA · offline-ready · science-verified</div>
+  <div class="version-badge">v48.0 · PWA · offline-ready · science-verified</div>
 </header>
 
 <div style="display:flex;flex-direction:column;gap:18px;">
@@ -1466,22 +1466,42 @@ function toggleJournal(){
 function saveBake(){
   const notes=document.getElementById('journalNotes').value.trim();
   const entries=JSON.parse(localStorage.getItem('omarPitaJournal')||'[]');
+  // Capture all meaningful bake parameters at time of save
+  const yeastEl=document.querySelector('#recipe .ing-weight');
+  // Read yeast, sugar, water temp from live recipe card
+  const recipeItems=[...document.querySelectorAll('#recipe .recipe-item')];
+  function getIngVal(label){
+    const item=recipeItems.find(el=>el.textContent.toLowerCase().includes(label));
+    return item?item.querySelector('.ing-weight').textContent.trim():'—';
+  }
+  const doughTempInput=document.getElementById('doughTempInput');
+  const doughTemp=doughTempInput&&doughTempInput.value?doughTempInput.value+'°F':'not recorded';
   const snap={
     id:Date.now(),
     date:new Date().toLocaleString(),
+    // Settings
     mode,flour,yeast,oven,mixer,
+    formula:useNewPhysics?'new physics':'v40 classic',
     count:document.getElementById('countSlider').value,
     size:document.getElementById('sizeSlider').value,
     hyd:document.getElementById('hydVal').textContent,
+    // Fermentation
     bulk:document.getElementById('bulkVal').textContent,
     fTime:document.getElementById('fTimeVal').textContent,
     rT:document.getElementById('tempVal').textContent,
     fT:document.getElementById('fTempVal').textContent,
-    inoc:document.getElementById('inocVal').textContent,
+    inoc:document.getElementById('inocVal')?document.getElementById('inocVal').textContent:'—',
+    activity:document.getElementById('actVal')?document.getElementById('actVal').textContent:'—',
+    // Recipe card values at time of save
+    yeastRec:getIngVal('yeast'),
+    sugarRec:getIngVal('sugar'),
+    waterTemp:document.getElementById('ddtBox')?
+      (document.getElementById('ddtBox').textContent.match(/[\d.]+°[FC]/)||['—'])[0]:'—',
+    doughTemp,
     notes,
   };
   entries.unshift(snap);
-  if(entries.length>20)entries.pop();// keep last 20 bakes
+  if(entries.length>20)entries.pop();
   localStorage.setItem('omarPitaJournal',JSON.stringify(entries));
   document.getElementById('journalNotes').value='';
   renderJournal();
@@ -1493,8 +1513,19 @@ function renderJournal(){
   if(!entries.length){container.innerHTML=`<div style="font-family:var(--num-font);font-size:0.78rem;color:var(--ink3);text-align:center;padding:12px;">no saved bakes yet</div>`;return;}
   container.innerHTML=entries.map(e=>`
     <div class="journal-entry">
-      <div class="journal-entry-date">${e.date}</div>
-      <div class="journal-entry-params">${e.count}×${e.size}g · ${e.hyd} · ${e.mode} · ${e.bulk} bulk · ${e.fTime} retard · ${e.rT} room · ${e.fT} fridge</div>
+      <div class="journal-entry-date">${e.date} · ${e.formula||'—'}</div>
+      <div class="journal-entry-params">
+        ${e.count}×${e.size}g · ${e.hyd} · ${e.mode} · ${e.flour} flour · ${e.yeast||'ADY'}
+      </div>
+      <div class="journal-entry-params">
+        bulk ${e.bulk} · retard ${e.fTime} · room ${e.rT} · fridge ${e.fT} · activity ${e.activity||'—'}
+      </div>
+      <div class="journal-entry-params">
+        yeast: ${e.yeastRec||'—'} · sugar: ${e.sugarRec||'none'} · water temp: ${e.waterTemp||'—'} · dough temp: ${e.doughTemp||'not recorded'}
+      </div>
+      <div class="journal-entry-params">
+        oven: ${e.oven||'—'} · mixer: ${e.mixer||'—'}${e.inoc&&e.inoc!=='—'?' · inoculation: '+e.inoc:''}
+      </div>
       ${e.notes?`<div class="journal-entry-notes">${e.notes}</div>`:''}
       <div class="journal-entry-actions">
         <button class="journal-action-btn" onclick="loadBake(${e.id})">reload settings</button>
@@ -1529,9 +1560,13 @@ function exportJournal(){
   const lines=['OMAR PITA MASTER — BAKE JOURNAL','exported '+new Date().toLocaleString(),'='.repeat(50),''];
   entries.forEach((e,i)=>{
     lines.push('BAKE '+(i+1)+' — '+e.date);
-    lines.push(e.count+'×'+e.size+'g · '+e.hyd+' hydration · '+e.mode+' mode · '+e.yeast);
-    lines.push('bulk: '+e.bulk+' · retard: '+e.fTime+' · room: '+e.rT+' · fridge: '+e.fT);
-    if(e.inoc)lines.push('inoculation: '+e.inoc);
+    lines.push('formula: '+(e.formula||'—'));
+    lines.push(e.count+'×'+e.size+'g · '+e.hyd+' hydration · '+e.mode+' mode · '+(e.yeast||'ADY')+' · '+e.flour+' flour');
+    lines.push('oven: '+(e.oven||'—')+' · mixer: '+(e.mixer||'—'));
+    lines.push('bulk: '+e.bulk+' · retard: '+e.fTime+' · room: '+e.rT+' · fridge: '+e.fT+' · activity: '+(e.activity||'—'));
+    lines.push('yeast recommended: '+(e.yeastRec||'—')+' · sugar recommended: '+(e.sugarRec||'none'));
+    lines.push('water temp: '+(e.waterTemp||'—')+' · dough temp after mixing: '+(e.doughTemp||'not recorded'));
+    if(e.inoc&&e.inoc!=='—')lines.push('inoculation: '+e.inoc);
     if(e.notes)lines.push('notes: '+e.notes);
     lines.push('');
   });
@@ -1681,7 +1716,7 @@ function printCard(){
     <button class="close-btn" onclick="closePrint()" title="close">✕</button>
     <div class="ey">✦ recipe card</div>
     <h1>Omar <span>Pita</span></h1>
-    <div class="meta">baking · ${tFmt} · v47.0 PWA · science-verified</div>
+    <div class="meta">baking · ${tFmt} · v48.0 PWA · science-verified</div>
     <div class="params">
       <span class="param">${count} pitas</span><span class="param">${size} each</span>
       <span class="param">hydration ${hyd}</span><span class="param">bulk ${bulk}</span>
@@ -1701,7 +1736,7 @@ function printCard(){
       </div>
     </div>
     <div class="wisdom">${wHTML}</div>
-    <div class="footer">Omar Pita Master v47.0 · ${isPro?'precision':'artisan'} · printed ${new Date().toLocaleString()}</div>
+    <div class="footer">Omar Pita Master v48.0 · ${isPro?'precision':'artisan'} · printed ${new Date().toLocaleString()}</div>
   `;
   document.body.appendChild(div);
   div.style.display='block';

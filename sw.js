@@ -1,5 +1,5 @@
 // Omar Pita Master — Service Worker v34.0
-const CACHE = 'omar-pita-v47';
+const CACHE = 'omar-pita-v48';
 
 const ASSETS = [
   './',
