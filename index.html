@@ -425,7 +425,7 @@ input[type=datetime-local]:focus{border-color:var(--accent);}
   <div class="header-eyebrow" id="headerEyebrow">✦ a bread calculator, with feeling ✦</div>
   <h1>Omar <span>Pita</span></h1>
   <div class="header-sub" id="headerSub">I thought carefully about every gram. You're welcome.</div>
-  <div class="version-badge">v46.0 · PWA · offline-ready · science-verified</div>
+  <div class="version-badge">v47.0 · PWA · offline-ready · science-verified</div>
 </header>
 
 <div style="display:flex;flex-direction:column;gap:18px;">
@@ -742,6 +742,32 @@ function mixerRecommendation(m){
 }
 const ACTIVITY_UNDER=1.8,BLOOM_MINS=10;
 
+// ─── SUGAR GRADUATION MODEL ───────────────────────────────────────────────────
+// Sugar serves different purposes at different fermentation lengths:
+// Rapid same-day: feeds fast gas production, aids browning, supports ADY bloom
+// Long cold retard: counterproductive — hyperactivates yeast before fridge,
+//   competes with flour maltose development, depletes browning substrate
+// Sourdough: always 0% — LAB + yeast work exclusively on flour sugars
+//   Added sugar consumed by LAB → lowers pH → suppresses Maillard browning
+// IDY floor: 0% (no bloom needed)
+// ADY floor: 0.25% (minimum to support reliable bloom activation)
+// Activity anchors: same model as yeast, same direction
+//   Low activity (≤1.8) → 2% sugar  (rapid same-day)
+//   High activity (≥6.0) → 0% IDY / 0.25% ADY floor (long ferment)
+const SUGAR_HIGH    = 0.020;  // 2% at low activity
+const SUGAR_ACT_HIGH= 1.8;    // activity below this = full 2%
+const SUGAR_ACT_LOW = 6.0;    // activity above this = floor
+const SUGAR_FLOOR_IDY = 0.000; // IDY: no sugar needed for long ferments
+const SUGAR_FLOOR_ADY = 0.0025;// ADY: 0.25% minimum for reliable bloom
+
+function calcSugarPct(activity, isADY){
+  const floor=isADY?SUGAR_FLOOR_ADY:SUGAR_FLOOR_IDY;
+  if(activity<=SUGAR_ACT_HIGH) return SUGAR_HIGH;
+  if(activity>=SUGAR_ACT_LOW)  return floor;
+  const t=(activity-SUGAR_ACT_HIGH)/(SUGAR_ACT_LOW-SUGAR_ACT_HIGH);
+  return SUGAR_HIGH+(floor-SUGAR_HIGH)*t;
+}
+
 // ─── DUAL FORMULA SYSTEM ─────────────────────────────────────────────────────
 // Toggle between new physics (default) and v40 classic (fallback/comparison)
 // New physics: suppF=0.518 constant (Q10 handles temperature), K=0.493
@@ -1026,7 +1052,9 @@ function update(){
       <span class="ing-weight">${Math.round(fb*0.06)} g</span>
     </div>`;
     html+=ingRow('milk',fb*0.04);
-    html+=ingRow('sugar',fb*0.02);
+    // Sugar: always 0 in sourdough — LAB + wild yeast work exclusively on flour sugars
+    // Added sugar consumed by LAB lowers pH and suppresses Maillard browning
+    // Milk powder lactose handles browning. Flour maltose handles fermentation.
     html+=ingRow('mahlab',fb*0.005,1);
   }else{
     // Yeasted mixing order: water → flour → (bloom yeast separately) → salt → oil → milk → sugar → mahlab
@@ -1100,12 +1128,29 @@ function update(){
       <span class="ing-weight">${Math.round(fb*0.06)} g</span>
     </div>`;
     html+=ingRow('milk',fb*0.04);
-    // Sugar: show ADY bloom note only when ADY is selected
-    const sugarNote = (yeast==='ADY') ? ' · reserve a pinch for the bloom' : '';
-    html+=`<div class="recipe-item">
-      <span class="ing-name"><span class="ing-emoji">${ingCfg.sugar.emoji}</span>${ingCfg.sugar.label}${sugarNote?`<span style="font-family:var(--num-font);font-size:0.72rem;color:var(--ink3);font-style:normal;margin-left:4px;">${sugarNote}</span>`:''}</span>
-      <span class="ing-weight">${Math.round(fb*0.02)} g</span>
-    </div>`;
+    // Sugar: activity-driven graduation
+    // High activity (long ferment) → less sugar — yeast works on flour maltose
+    // Low activity (rapid same-day) → 2% sugar — needed for fast gas and browning
+    // ADY floor: 0.25% minimum for reliable bloom activation
+    // IDY floor: 0% — no bloom needed, flour sugars sufficient for long ferments
+    const isADY=yeast==='ADY';
+    const sugarPct=calcSugarPct(activity,isADY);
+    const sugarG=fb*sugarPct;
+    const sugarNote=isADY&&sugarG>0?' · reserve a pinch for the bloom':'';
+    if(sugarG>=1){
+      // Show as grams when meaningful amount
+      html+=`<div class="recipe-item">
+        <span class="ing-name"><span class="ing-emoji">${ingCfg.sugar.emoji}</span>${ingCfg.sugar.label}${sugarNote?`<span style="font-family:var(--num-font);font-size:0.72rem;color:var(--ink3);font-style:normal;margin-left:4px;">${sugarNote}</span>`:''}</span>
+        <span class="ing-weight">${Math.round(sugarG)} g</span>
+      </div>`;
+    } else if(sugarG>0){
+      // Show as pinch when very small (ADY floor)
+      html+=`<div class="recipe-item">
+        <span class="ing-name"><span class="ing-emoji">${ingCfg.sugar.emoji}</span>${ingCfg.sugar.label}<span style="font-family:var(--num-font);font-size:0.72rem;color:var(--ink3);font-style:normal;margin-left:4px;"> · pinch — for the bloom only</span></span>
+        <span class="ing-weight">pinch</span>
+      </div>`;
+    }
+    // If sugarG===0 (IDY long ferment): sugar omitted entirely from recipe card
     html+=ingRow('mahlab',fb*0.005,1);
   }
   document.getElementById('recipe').innerHTML=html;
@@ -1636,7 +1681,7 @@ function printCard(){
     <button class="close-btn" onclick="closePrint()" title="close">✕</button>
     <div class="ey">✦ recipe card</div>
     <h1>Omar <span>Pita</span></h1>
-    <div class="meta">baking · ${tFmt} · v46.0 PWA · science-verified</div>
+    <div class="meta">baking · ${tFmt} · v47.0 PWA · science-verified</div>
     <div class="params">
       <span class="param">${count} pitas</span><span class="param">${size} each</span>
       <span class="param">hydration ${hyd}</span><span class="param">bulk ${bulk}</span>
@@ -1656,7 +1701,7 @@ function printCard(){
       </div>
     </div>
     <div class="wisdom">${wHTML}</div>
-    <div class="footer">Omar Pita Master v46.0 · ${isPro?'precision':'artisan'} · printed ${new Date().toLocaleString()}</div>
+    <div class="footer">Omar Pita Master v47.0 · ${isPro?'precision':'artisan'} · printed ${new Date().toLocaleString()}</div>
   `;
   document.body.appendChild(div);
   div.style.display='block';
