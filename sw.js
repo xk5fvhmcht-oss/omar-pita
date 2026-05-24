@@ -1,63 +1,48 @@
-// Omar Pita Master — Service Worker v34.0
-const CACHE = 'omar-pita-v49';
+// ═══════════════════════════════════════════
+// OMAR'S BOARD & GRAZE — SERVICE WORKER
+// Version 1.5.0
+// ═══════════════════════════════════════════
+
+const CACHE = 'board-graze-v1.5.0';
 
 const ASSETS = [
   './',
   './index.html',
+  './style.css',
+  './app.js',
+  './data.js',
+  './manifest.json',
   './apple-touch-icon.png',
-  'https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,300;1,9..144,500&family=DM+Mono:wght@300;400&family=Caveat:wght@400;600&family=Inter:wght@300;400;500;600&display=swap',
+  './apple-touch-icon-120.png',
+  './apple-touch-icon-152.png',
+  './apple-touch-icon-167.png',
+  './apple-touch-icon-180.png',
+  './icon-192.png',
+  './icon-512.png',
+  'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Lato:wght@300;400;700&display=swap',
 ];
 
-// Install: cache all core assets
+// Install — cache all assets
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(CACHE).then(cache => {
-      // Cache what we can — font CDN may fail with no-cors, that's fine
-      return Promise.allSettled(
-        ASSETS.map(url =>
-          fetch(url, { mode: 'no-cors' })
-            .then(r => cache.put(url, r))
-            .catch(() => {}) // silently skip anything that fails
-        )
-      );
-    }).then(() => self.skipWaiting())
+    caches.open(CACHE).then(cache => cache.addAll(ASSETS))
   );
+  self.skipWaiting();
 });
 
-// Activate: clean up old caches
+// Activate — delete old caches
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(
-        keys.filter(k => k !== CACHE).map(k => caches.delete(k))
-      )
-    ).then(() => self.clients.claim())
+      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+    )
   );
+  self.clients.claim();
 });
 
-// Fetch: cache-first, fall back to network, cache new responses
+// Fetch — cache first, network fallback
 self.addEventListener('fetch', e => {
-  // Only handle GET requests
-  if (e.request.method !== 'GET') return;
-
   e.respondWith(
-    caches.match(e.request).then(cached => {
-      if (cached) return cached;
-
-      return fetch(e.request).then(response => {
-        // Cache successful responses
-        if (response && response.status === 200) {
-          const clone = response.clone();
-          caches.open(CACHE).then(cache => cache.put(e.request, clone));
-        }
-        return response;
-      }).catch(() => {
-        // Offline and not cached — return a minimal offline response
-        if (e.request.destination === 'document') {
-          return caches.match('./index.html');
-        }
-        return new Response('', { status: 503 });
-      });
-    })
+    caches.match(e.request).then(cached => cached || fetch(e.request))
   );
 });
