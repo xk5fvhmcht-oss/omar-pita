@@ -425,7 +425,7 @@ input[type=datetime-local]:focus{border-color:var(--accent);}
   <div class="header-eyebrow" id="headerEyebrow">✦ a bread calculator, with feeling ✦</div>
   <h1>Omar <span>Pita</span></h1>
   <div class="header-sub" id="headerSub">I thought carefully about every gram. You're welcome.</div>
-  <div class="version-badge">v48.0 · PWA · offline-ready · science-verified</div>
+  <div class="version-badge">v49.0 · PWA · offline-ready · science-verified</div>
 </header>
 
 <div style="display:flex;flex-direction:column;gap:18px;">
@@ -1103,6 +1103,13 @@ function update(){
       }
     }
 
+    // 90% conservative factor — new physics only, classic untouched
+    // Real bake data: lower end of range still came out slightly ahead of schedule
+    // Asymmetric consequences: under-yeast = wait longer, over-yeast = blown dough
+    // Baker can always use upper end of range if behind schedule
+    if(useNewPhysics) yPctIDY=yPctIDY*0.90;
+    yPctIDY=Math.max(0.0005,yPctIDY); // ensure floor after reduction
+
     const yPctDisplay=yeast==='IDY'?yPctIDY:yPctIDY/0.75; // IDY stays, ADY = IDY/0.75
     const yG=fb*yPctDisplay;
     const c=ingCfg['yeast'];
@@ -1716,7 +1723,7 @@ function printCard(){
     <button class="close-btn" onclick="closePrint()" title="close">✕</button>
     <div class="ey">✦ recipe card</div>
     <h1>Omar <span>Pita</span></h1>
-    <div class="meta">baking · ${tFmt} · v48.0 PWA · science-verified</div>
+    <div class="meta">baking · ${tFmt} · v49.0 PWA · science-verified</div>
     <div class="params">
       <span class="param">${count} pitas</span><span class="param">${size} each</span>
       <span class="param">hydration ${hyd}</span><span class="param">bulk ${bulk}</span>
@@ -1736,7 +1743,7 @@ function printCard(){
       </div>
     </div>
     <div class="wisdom">${wHTML}</div>
-    <div class="footer">Omar Pita Master v48.0 · ${isPro?'precision':'artisan'} · printed ${new Date().toLocaleString()}</div>
+    <div class="footer">Omar Pita Master v49.0 · ${isPro?'precision':'artisan'} · printed ${new Date().toLocaleString()}</div>
   `;
   document.body.appendChild(div);
   div.style.display='block';
