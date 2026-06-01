@@ -425,7 +425,7 @@ input[type=datetime-local]:focus{border-color:var(--accent);}
   <div class="header-eyebrow" id="headerEyebrow">✦ a bread calculator, with feeling ✦</div>
   <h1>Omar <span>Pita</span></h1>
   <div class="header-sub" id="headerSub">I thought carefully about every gram. You're welcome.</div>
-  <div class="version-badge">v49.0 · PWA · offline-ready · science-verified</div>
+  <div class="version-badge">v50.0 · PWA · offline-ready · science-verified</div>
 </header>
 
 <div style="display:flex;flex-direction:column;gap:18px;">
@@ -570,6 +570,7 @@ input[type=datetime-local]:focus{border-color:var(--accent);}
     <div class="card-title" style="justify-content:space-between;">
       <span id="timelineTitle">Your timeline</span>
       <div style="display:flex;gap:6px;align-items:center;">
+        <button class="pill" id="wakeLockBtn" onclick="toggleWakeLock()" style="font-style:normal;font-size:0.72rem;padding:4px 10px;">☾ keep awake</button>
         <button class="pill" id="tempUnitBtn" onclick="toggleCelsius()" style="font-style:normal;font-size:0.72rem;padding:4px 10px;">→ °C</button>
         <button class="pill" onclick="printCard()" style="font-style:normal;font-size:0.72rem;padding:4px 10px;">🖨 print</button>
       </div>
@@ -848,6 +849,58 @@ function setYeast(y){yeast=y;update();saveState();}
 function toggleAuto(){const cfg=MIXER_CFG[mixer];if(mode!=='sour'&&flour!=='AP'&&cfg.autoLock!=='off'){isAuto=!isAuto;update();saveState();}}
 function setQuick(v){document.getElementById('sizeSlider').value=v;update();saveState();}
 function toggleCelsius(){useCelsius=!useCelsius;update();saveState();}
+
+// ─── WAKE LOCK — keep screen awake during hands-on baking ────────────────────
+// Screen Wake Lock API — Safari iOS 16.4+, Chrome, Edge. Graceful fallback if unsupported.
+let wakeLock=null;
+let wakeLockWanted=false;
+async function requestWakeLock(){
+  if(!('wakeLock' in navigator))return false;
+  try{
+    wakeLock=await navigator.wakeLock.request('screen');
+    wakeLock.addEventListener('release',()=>{
+      // System released it (e.g. tab hidden) — reflect in button if user still wants it
+      if(!wakeLockWanted)updateWakeLockBtn();
+    });
+    return true;
+  }catch(e){return false;}
+}
+async function toggleWakeLock(){
+  const btn=document.getElementById('wakeLockBtn');
+  if(!('wakeLock' in navigator)){
+    btn.textContent='✕ not supported';
+    setTimeout(()=>{btn.textContent='☾ keep awake';},2000);
+    return;
+  }
+  if(wakeLockWanted){
+    wakeLockWanted=false;
+    if(wakeLock){await wakeLock.release();wakeLock=null;}
+  }else{
+    wakeLockWanted=true;
+    await requestWakeLock();
+  }
+  updateWakeLockBtn();
+}
+function updateWakeLockBtn(){
+  const btn=document.getElementById('wakeLockBtn');
+  if(!btn)return;
+  if(wakeLockWanted){
+    btn.textContent='☀ staying awake';
+    btn.style.background='var(--accent)';
+    btn.style.color='#fff';
+  }else{
+    btn.textContent='☾ keep awake';
+    btn.style.background='';
+    btn.style.color='';
+  }
+}
+// Re-acquire wake lock when tab becomes visible again (iOS releases on background)
+document.addEventListener('visibilitychange',async()=>{
+  if(wakeLockWanted&&document.visibilityState==='visible'){
+    await requestWakeLock();
+    updateWakeLockBtn();
+  }
+});
 
 // ─── INGREDIENT CONFIG ────────────────────────────────────────────────────────
 const ingCfg={
@@ -1723,7 +1776,7 @@ function printCard(){
     <button class="close-btn" onclick="closePrint()" title="close">✕</button>
     <div class="ey">✦ recipe card</div>
     <h1>Omar <span>Pita</span></h1>
-    <div class="meta">baking · ${tFmt} · v49.0 PWA · science-verified</div>
+    <div class="meta">baking · ${tFmt} · v50.0 PWA · science-verified</div>
     <div class="params">
       <span class="param">${count} pitas</span><span class="param">${size} each</span>
       <span class="param">hydration ${hyd}</span><span class="param">bulk ${bulk}</span>
@@ -1743,7 +1796,7 @@ function printCard(){
       </div>
     </div>
     <div class="wisdom">${wHTML}</div>
-    <div class="footer">Omar Pita Master v49.0 · ${isPro?'precision':'artisan'} · printed ${new Date().toLocaleString()}</div>
+    <div class="footer">Omar Pita Master v50.0 · ${isPro?'precision':'artisan'} · printed ${new Date().toLocaleString()}</div>
   `;
   document.body.appendChild(div);
   div.style.display='block';
