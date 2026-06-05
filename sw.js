@@ -1,4 +1,5 @@
-// Omar Pita Master — Service Worker v34.0
+// Omar Pita Master — Service Worker
+// Network-first for app HTML (always latest), cache-first for static assets
 const CACHE = 'omar-pita-v51';
 
 const ASSETS = [
@@ -35,29 +36,44 @@ self.addEventListener('activate', e => {
   );
 });
 
-// Fetch: cache-first, fall back to network, cache new responses
+// Fetch strategy:
+//   HTML document → network-first (always get latest version when online,
+//                    fall back to cache when offline)
+//   Everything else (fonts, icons, static) → cache-first (never changes)
 self.addEventListener('fetch', e => {
-  // Only handle GET requests
   if (e.request.method !== 'GET') return;
 
-  e.respondWith(
-    caches.match(e.request).then(cached => {
-      if (cached) return cached;
+  const isDocument = e.request.destination === 'document' ||
+                     e.request.mode === 'navigate';
 
-      return fetch(e.request).then(response => {
-        // Cache successful responses
+  if (isDocument) {
+    // NETWORK-FIRST for the app itself — guarantees latest version
+    e.respondWith(
+      fetch(e.request).then(response => {
         if (response && response.status === 200) {
           const clone = response.clone();
           caches.open(CACHE).then(cache => cache.put(e.request, clone));
         }
         return response;
-      }).catch(() => {
-        // Offline and not cached — return a minimal offline response
-        if (e.request.destination === 'document') {
-          return caches.match('./index.html');
+      }).catch(() =>
+        // Offline — serve cached version
+        caches.match(e.request).then(c => c || caches.match('./index.html'))
+      )
+    );
+    return;
+  }
+
+  // CACHE-FIRST for static assets (fonts, icons) — these don't change
+  e.respondWith(
+    caches.match(e.request).then(cached => {
+      if (cached) return cached;
+      return fetch(e.request).then(response => {
+        if (response && response.status === 200) {
+          const clone = response.clone();
+          caches.open(CACHE).then(cache => cache.put(e.request, clone));
         }
-        return new Response('', { status: 503 });
-      });
+        return response;
+      }).catch(() => new Response('', { status: 503 }));
     })
   );
 });
