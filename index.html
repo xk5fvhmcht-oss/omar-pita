@@ -425,7 +425,7 @@ input[type=datetime-local]:focus{border-color:var(--accent);}
   <div class="header-eyebrow" id="headerEyebrow">✦ a bread calculator, with feeling ✦</div>
   <h1>Omar <span>Pita</span></h1>
   <div class="header-sub" id="headerSub">I thought carefully about every gram. You're welcome.</div>
-  <div class="version-badge">v50.0 · PWA · offline-ready · science-verified</div>
+  <div class="version-badge">v51.0 · PWA · offline-ready · science-verified</div>
 </header>
 
 <div style="display:flex;flex-direction:column;gap:18px;">
@@ -577,11 +577,16 @@ input[type=datetime-local]:focus{border-color:var(--accent);}
     </div>
     <ul class="timeline" id="schedule"></ul>
     <div class="wisdom" id="wisdom"></div>
-    <button class="journal-btn" onclick="toggleJournal()">✦ save this bake to journal</button>
-    <div class="journal-panel" id="journalPanel">
+    <div style="display:flex;gap:8px;margin-top:10px;">
+      <button class="journal-btn" onclick="toggleSavePanel()" style="margin-top:0;">✦ save this bake</button>
+      <button class="journal-btn" onclick="toggleViewPanel()" style="margin-top:0;">📖 view journal <span id="journalCount" style="font-family:var(--num-font);font-size:0.7rem;opacity:0.7;"></span></button>
+    </div>
+    <div class="journal-panel" id="savePanel">
       <textarea id="journalNotes" placeholder="notes — what worked, what didn't, how it tasted..."></textarea>
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-        <button class="journal-save-btn" onclick="saveBake()">save bake</button>
+      <button class="journal-save-btn" onclick="saveBake()">save bake</button>
+    </div>
+    <div class="journal-panel" id="viewPanel">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
         <button class="journal-save-btn" onclick="exportJournal()" style="background:var(--sub);color:var(--ink2);border:var(--card-border);">✦ export all</button>
       </div>
       <div class="journal-entries" id="journalEntries"></div>
@@ -1488,6 +1493,7 @@ updateFormulaBtn();
 if(theme==='pro'){document.getElementById('themeLabel').textContent='ARTISAN MODE';}
 update();
 setInterval(update,60000);
+updateJournalCount();
 
 // ─── DOUGH TEMPERATURE CHECKPOINT ────────────────────────────────────────────
 function checkDoughTemp(){
@@ -1517,10 +1523,24 @@ function checkDoughTemp(){
 }
 
 // ─── BAKE JOURNAL ─────────────────────────────────────────────────────────────
-function toggleJournal(){
-  const panel=document.getElementById('journalPanel');
-  panel.classList.toggle('open');
-  if(panel.classList.contains('open'))renderJournal();
+function toggleSavePanel(){
+  const save=document.getElementById('savePanel');
+  const view=document.getElementById('viewPanel');
+  view.classList.remove('open'); // close the other
+  save.classList.toggle('open');
+}
+function toggleViewPanel(){
+  const save=document.getElementById('savePanel');
+  const view=document.getElementById('viewPanel');
+  save.classList.remove('open'); // close the other
+  view.classList.toggle('open');
+  if(view.classList.contains('open'))renderJournal();
+}
+function updateJournalCount(){
+  const badge=document.getElementById('journalCount');
+  if(!badge)return;
+  const entries=JSON.parse(localStorage.getItem('omarPitaJournal')||'[]');
+  badge.textContent=entries.length?'('+entries.length+')':'';
 }
 
 function saveBake(){
@@ -1565,6 +1585,10 @@ function saveBake(){
   localStorage.setItem('omarPitaJournal',JSON.stringify(entries));
   document.getElementById('journalNotes').value='';
   renderJournal();
+  updateJournalCount();
+  // Close save panel, open view panel to show the just-saved bake
+  document.getElementById('savePanel').classList.remove('open');
+  document.getElementById('viewPanel').classList.add('open');
 }
 
 function renderJournal(){
@@ -1612,6 +1636,7 @@ function deleteBake(id){
   const entries=JSON.parse(localStorage.getItem('omarPitaJournal')||'[]');
   localStorage.setItem('omarPitaJournal',JSON.stringify(entries.filter(x=>x.id!==id)));
   renderJournal();
+  updateJournalCount();
 }
 
 function exportJournal(){
@@ -1776,7 +1801,7 @@ function printCard(){
     <button class="close-btn" onclick="closePrint()" title="close">✕</button>
     <div class="ey">✦ recipe card</div>
     <h1>Omar <span>Pita</span></h1>
-    <div class="meta">baking · ${tFmt} · v50.0 PWA · science-verified</div>
+    <div class="meta">baking · ${tFmt} · v51.0 PWA · science-verified</div>
     <div class="params">
       <span class="param">${count} pitas</span><span class="param">${size} each</span>
       <span class="param">hydration ${hyd}</span><span class="param">bulk ${bulk}</span>
@@ -1796,7 +1821,7 @@ function printCard(){
       </div>
     </div>
     <div class="wisdom">${wHTML}</div>
-    <div class="footer">Omar Pita Master v50.0 · ${isPro?'precision':'artisan'} · printed ${new Date().toLocaleString()}</div>
+    <div class="footer">Omar Pita Master v51.0 · ${isPro?'precision':'artisan'} · printed ${new Date().toLocaleString()}</div>
   `;
   document.body.appendChild(div);
   div.style.display='block';
