@@ -1,6 +1,6 @@
 // Omar Pita Master — Service Worker
 // Network-first for app HTML (always latest), cache-first for static assets
-const CACHE = 'omar-pita-v51';
+const CACHE = 'omar-pita-v52';
 
 const ASSETS = [
   './',

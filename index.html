@@ -425,7 +425,7 @@ input[type=datetime-local]:focus{border-color:var(--accent);}
   <div class="header-eyebrow" id="headerEyebrow">✦ a bread calculator, with feeling ✦</div>
   <h1>Omar <span>Pita</span></h1>
   <div class="header-sub" id="headerSub">I thought carefully about every gram. You're welcome.</div>
-  <div class="version-badge">v51.0 · PWA · offline-ready · science-verified</div>
+  <div class="version-badge">v52.0 · PWA · offline-ready · science-verified</div>
 </header>
 
 <div style="display:flex;flex-direction:column;gap:18px;">
@@ -1323,10 +1323,18 @@ function update(){
     ?`roll all ${count} pitas · ~3mm thin (about the thickness of a pound coin) · cover with damp cloth · rest 7–8 min before going outside · dough should feel soft and yielding${gozneyLargeBatch?' · large batch — start rolling before lighting the Gozney':''}`
     :'roll to ~3mm (pound coin thickness) · cover with damp cloth · rest 7–8 min · the dough will tell you when it\'s ready — it relaxes and stops springing back';
 
+  // Final proof readiness note — what a ready-to-bake pita looks like
+  // The brief rest after rolling lets gluten relax so the disc puffs cleanly
+  const proofNote='disc should look slightly puffed and feel relaxed, not tight · a gentle press springs back slowly and leaves a faint dent · if it springs back fast, give it a few more minutes · if your finger leaves a lasting dent it is over-proofed — bake it now · keep covered so the surface does not dry and skin over';
+
   // Bake note — visual success cues per oven
   const bakeNote=oven==='steel'
     ?`pita should puff fully within 90 sec — if it doesn\'t, your steel needs more preheat time · flip once · look for light char spots · ${count} pitas`
     :`watch for full puff then light char on the dome side — pull immediately · 60–90 sec total · ${count} pitas`;
+
+  // Final proof happens during the roll rest — place the readiness check
+  // just before bake, timed at the end of the 7-8 min rest
+  const tProof=new Date(target.getTime()-2*60000); // ~2 min before bake
 
   const events=[];
   events.push({t:tPreheat,emoji:'🌡️',label:'preheat oven',note:preheatNote,nc:'preheat-note',extra:''});
@@ -1337,7 +1345,8 @@ function update(){
     events.push({t:tPull,emoji:'⏰',label:'pull from fridge',note:pullNote,nc:'',extra:''});
   }
   events.push({t:tBall,emoji:'⚖️',label:'portion & ball',note:ballNote,nc:'',extra:''});
-  events.push({t:tRoll,emoji:'🔵',label:'roll & final proof',note:rollNote,nc:'',extra:''});
+  events.push({t:tRoll,emoji:'🔵',label:'roll & rest',note:rollNote,nc:'',extra:''});
+  events.push({t:tProof,emoji:'👆',label:'final proof check',note:proofNote,nc:'',extra:''});
   events.push({t:target,emoji:'🔥',label:'bake',note:bakeNote,nc:'',extra:'bake'});
   events.sort((a,b)=>a.t.getTime()-b.t.getTime());
 
@@ -1523,6 +1532,27 @@ function checkDoughTemp(){
 }
 
 // ─── BAKE JOURNAL ─────────────────────────────────────────────────────────────
+// Safe storage helpers — guard against corrupt data and storage quota errors
+function readJournal(){
+  try{
+    const raw=localStorage.getItem('omarPitaJournal');
+    if(!raw)return [];
+    const parsed=JSON.parse(raw);
+    return Array.isArray(parsed)?parsed:[];
+  }catch(e){
+    // Corrupt data — reset to empty rather than crash
+    return [];
+  }
+}
+function writeJournal(entries){
+  try{
+    writeJournal(entries);
+    return true;
+  }catch(e){
+    // Quota exceeded or storage unavailable
+    return false;
+  }
+}
 function toggleSavePanel(){
   const save=document.getElementById('savePanel');
   const view=document.getElementById('viewPanel');
@@ -1539,13 +1569,13 @@ function toggleViewPanel(){
 function updateJournalCount(){
   const badge=document.getElementById('journalCount');
   if(!badge)return;
-  const entries=JSON.parse(localStorage.getItem('omarPitaJournal')||'[]');
+  const entries=readJournal();
   badge.textContent=entries.length?'('+entries.length+')':'';
 }
 
 function saveBake(){
   const notes=document.getElementById('journalNotes').value.trim();
-  const entries=JSON.parse(localStorage.getItem('omarPitaJournal')||'[]');
+  const entries=readJournal();
   // Capture all meaningful bake parameters at time of save
   const yeastEl=document.querySelector('#recipe .ing-weight');
   // Read yeast, sugar, water temp from live recipe card
@@ -1582,7 +1612,7 @@ function saveBake(){
   };
   entries.unshift(snap);
   if(entries.length>20)entries.pop();
-  localStorage.setItem('omarPitaJournal',JSON.stringify(entries));
+  writeJournal(entries);
   document.getElementById('journalNotes').value='';
   renderJournal();
   updateJournalCount();
@@ -1592,7 +1622,7 @@ function saveBake(){
 }
 
 function renderJournal(){
-  const entries=JSON.parse(localStorage.getItem('omarPitaJournal')||'[]');
+  const entries=readJournal();
   const container=document.getElementById('journalEntries');
   if(!entries.length){container.innerHTML=`<div style="font-family:var(--num-font);font-size:0.78rem;color:var(--ink3);text-align:center;padding:12px;">no saved bakes yet</div>`;return;}
   container.innerHTML=entries.map(e=>`
@@ -1620,7 +1650,7 @@ function renderJournal(){
 }
 
 function loadBake(id){
-  const entries=JSON.parse(localStorage.getItem('omarPitaJournal')||'[]');
+  const entries=readJournal();
   const e=entries.find(x=>x.id===id);
   if(!e)return;
   mode=e.mode;flour=e.flour;yeast=e.yeast||'ADY';oven=e.oven;mixer=e.mixer;
@@ -1633,14 +1663,14 @@ function loadBake(id){
 }
 
 function deleteBake(id){
-  const entries=JSON.parse(localStorage.getItem('omarPitaJournal')||'[]');
+  const entries=readJournal();
   localStorage.setItem('omarPitaJournal',JSON.stringify(entries.filter(x=>x.id!==id)));
   renderJournal();
   updateJournalCount();
 }
 
 function exportJournal(){
-  const entries=JSON.parse(localStorage.getItem('omarPitaJournal')||'[]');
+  const entries=readJournal();
   if(!entries.length){alert('No bakes saved yet.');return;}
   const lines=['OMAR PITA MASTER — BAKE JOURNAL','exported '+new Date().toLocaleString(),'='.repeat(50),''];
   entries.forEach((e,i)=>{
@@ -1801,7 +1831,7 @@ function printCard(){
     <button class="close-btn" onclick="closePrint()" title="close">✕</button>
     <div class="ey">✦ recipe card</div>
     <h1>Omar <span>Pita</span></h1>
-    <div class="meta">baking · ${tFmt} · v51.0 PWA · science-verified</div>
+    <div class="meta">baking · ${tFmt} · v52.0 PWA · science-verified</div>
     <div class="params">
       <span class="param">${count} pitas</span><span class="param">${size} each</span>
       <span class="param">hydration ${hyd}</span><span class="param">bulk ${bulk}</span>
@@ -1821,7 +1851,7 @@ function printCard(){
       </div>
     </div>
     <div class="wisdom">${wHTML}</div>
-    <div class="footer">Omar Pita Master v51.0 · ${isPro?'precision':'artisan'} · printed ${new Date().toLocaleString()}</div>
+    <div class="footer">Omar Pita Master v52.0 · ${isPro?'precision':'artisan'} · printed ${new Date().toLocaleString()}</div>
   `;
   document.body.appendChild(div);
   div.style.display='block';
