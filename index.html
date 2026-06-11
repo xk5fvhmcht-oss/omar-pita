@@ -84,6 +84,13 @@
     --card-border:1px solid var(--border);
     --card-hover-shadow:0 4px 20px rgba(0,0,0,0.5);
   }
+  /* Override hardcoded dark-text colors that would vanish on dark backgrounds */
+  [data-theme="artisan"] .info-box.warm{color:#e8a860;}
+  [data-theme="artisan"] .dough-temp-response.rest{color:#e8a860;}
+  [data-theme="artisan"] .mixer-warn.soft{color:#e0a050;}
+  [data-theme="artisan"] .warn-box.over{color:#e0a050;}
+  [data-theme="artisan"] .tl-note.preheat-note{color:#e8a860;}
+  [data-theme="pro"] .tl-note.preheat-note{color:#a5b0e8;}
   /* Print overlay forces light regardless of dark mode — paper is white */
 }
 
@@ -453,7 +460,7 @@ input[type=datetime-local]:focus{border-color:var(--accent);}
   <div class="header-eyebrow" id="headerEyebrow">✦ a bread calculator, with feeling ✦</div>
   <h1>Omar <span>Pita</span></h1>
   <div class="header-sub" id="headerSub">I thought carefully about every gram. You're welcome.</div>
-  <div class="version-badge">v53.0 · PWA · offline-ready · science-verified</div>
+  <div class="version-badge">v54.0 · PWA · offline-ready · science-verified</div>
 </header>
 
 <div style="display:flex;flex-direction:column;gap:18px;">
@@ -732,7 +739,7 @@ function toggleTheme(){
   theme=theme==='artisan'?'pro':'artisan';
   document.documentElement.setAttribute('data-theme',theme);
   document.getElementById('themeLabel').textContent=theme==='pro'?'ARTISAN MODE':'PROFESSIONAL MODE';
-  document.getElementById('themeColor').content=theme==='pro'?'#f2ede4':'#fdf8f0';
+  // theme-color handled by media-query meta tags (light/dark) — no JS override needed
   updateThemeText();saveState();
 }
 function updateThemeText(){
@@ -1859,7 +1866,7 @@ function printCard(){
     <button class="close-btn" onclick="closePrint()" title="close">✕</button>
     <div class="ey">✦ recipe card</div>
     <h1>Omar <span>Pita</span></h1>
-    <div class="meta">baking · ${tFmt} · v53.0 PWA · science-verified</div>
+    <div class="meta">baking · ${tFmt} · v54.0 PWA · science-verified</div>
     <div class="params">
       <span class="param">${count} pitas</span><span class="param">${size} each</span>
       <span class="param">hydration ${hyd}</span><span class="param">bulk ${bulk}</span>
@@ -1879,7 +1886,7 @@ function printCard(){
       </div>
     </div>
     <div class="wisdom">${wHTML}</div>
-    <div class="footer">Omar Pita Master v53.0 · ${isPro?'precision':'artisan'} · printed ${new Date().toLocaleString()}</div>
+    <div class="footer">Omar Pita Master v54.0 · ${isPro?'precision':'artisan'} · printed ${new Date().toLocaleString()}</div>
   `;
   document.body.appendChild(div);
   div.style.display='block';
